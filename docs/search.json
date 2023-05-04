@@ -5,5 +5,12 @@
     "title": "About",
     "section": "",
     "text": "Abigail Burns is a graduate student at the University of Texas at Dallas and serves as GIS Analyst for the Town of Prosper."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Abigail Burns",
+    "section": "",
+    "text": "Welcome to my Quarto website where I host projects, data stories and more.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
   }
 ]
