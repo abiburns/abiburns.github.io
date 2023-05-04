@@ -12,7 +12,13 @@ website:
         text: About
       - href: portfolio.qmd
         text: Portfolio
-
+      - text: Assignments
+        menu: 
+          - Assignment1.qmd
+          - Assignment2.qmd
+      - href: project.qmd
+        text: Project
+      
 format:
   html:
     theme: vapor
