@@ -14,8 +14,10 @@ website:
         text: Portfolio
       - text: Assignments
         menu: 
-          - Assignment1.qmd
-          - Assignment2.qmd
+          - text: Assignment 1
+            href: Assignment1.pdf
+          - text: Assignment 2
+            href: Assignment2.pdf
       - href: project.qmd
         text: Project
       
