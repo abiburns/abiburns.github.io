@@ -14,7 +14,7 @@ website:
         text: Portfolio
       - href: assignments.qmd
         text: Assignments
-      - href: https://abiburns.shinyapps.io/DARTschedule/
+      - href: project.qmd
         text: Project
       
 format:

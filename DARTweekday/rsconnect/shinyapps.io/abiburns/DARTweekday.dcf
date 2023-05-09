@@ -1,0 +1,13 @@
+name: DARTweekday
+title: DARTweekday
+username:
+account: abiburns
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9062082
+bundleId: 7192051
+url: https://abiburns.shinyapps.io/DARTweekday/
+when: 1683601374.7515
+lastSyncTime: 1683601374.75152
+asMultiple: FALSE
+asStatic: FALSE
