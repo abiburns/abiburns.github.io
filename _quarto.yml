@@ -10,8 +10,8 @@ website:
         text: Home
       - href: about.qmd
         text: About
-      - href: portfolio.qmd
-        text: Portfolio
+      - href: resume.qmd
+        text: Resume
       - href: assignments.qmd
         text: Assignments
       - href: project.qmd
