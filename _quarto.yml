@@ -14,8 +14,10 @@ website:
         text: Resume
       - href: assignments.qmd
         text: Assignments
-      - href: project.qmd
-        text: Project
+      - href: db project.qmd
+        text: Database Project
+      - href: dvz project.qmd
+        text: Data Visualization Project
       
 format:
   html:
