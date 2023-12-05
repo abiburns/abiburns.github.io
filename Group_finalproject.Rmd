@@ -1,0 +1,816 @@
+---
+title: "Final Project Presentation"
+description: "This storyboard delivers the final project product by exhibiting the final project in pages."
+output: 
+  flexdashboard::flex_dashboard:
+   storyboard: true
+   theme: united  
+   font: sans-serif
+---
+
+**Data Visualization Project**
+
+<p><strong>Data Visualization Project</strong></p>
+
+<div id="storytelling-with-data" class="section level3">
+
+<h3>Storytelling with Data</h3>
+
+<p>
+
+<center><strong>Prescription Drug Pricing in the United States: Analyzing the Concrete and Abstract</strong></center>
+
+</p>
+
+<p>
+
+<center>Abigail Burns</center>
+
+</p>
+
+<p>
+
+<center>Sharon Jepkosgei</center>
+
+</p>
+
+<p>
+
+<center>Chizoma Oparaji</center>
+
+</p>
+
+<p>
+
+<center>Jannelle Marie Navales</center>
+
+</p>
+
+<p>
+
+<center><img src="https://github.com/abiburns/abiburns.github.io/raw/main/headerpic.png" width="600"/></center>
+
+</p>
+
+### Introduction
+
+This project is about visualization of the public spending on saving environment.
+
+**Purpose**
+
+This project is about visualization of the spending on prescription drugs and effect of regulations.
+
+**Background**
+
+-   More than **131 Million** people (66% of adults) in the US use prescription drugs
+
+-   Prescription drugs are vital to maintain/improve health
+
+-   The rising cost of prescription drugs = overburdened public healthcare systems and individual family budgets across the country
+
+-   Affordability & accessibility is vital
+
+**Research Question**
+
+How do changes in prescription drug policies and regulations impact the affordability and accessibility of prescriptions?
+
+**Research Hypothesis**
+
+Prescription drug policies and regulations have had a measurable impact on affordability and accessibility of prescriptions
+
+**Philosophy**
+
+-   More like Wickham's approach (not Tufte's simplicity)
+
+-   Layered Approach - building visualizations through layers (adding scales and aesthetics)
+
+-   Customization - Customize visualizations extensively, allowing for fine-tuned control over every aspect of a chart.
+
+-   Interesting and eye-catching visualizations
+
+### Statins {.no-padding}
+
+```{r echo=FALSE, message=FALSE}
+library(readr)
+library(readxl)
+library(plotly)
+df <- read_csv("https://raw.githubusercontent.com/sharonjepkosgei/sharonjepkosgei.github.io/main/df_revised.csv")
+
+df$`Brand Name` <- as.factor(df$`Brand Name`)
+df$`Generic Name` <- as.factor(df$`Generic Name`)
+df$Manufacturers <- as.integer(df$Manufacturers)
+df$Year <- as.integer(df$Year)
+df$`Total Spending` <- as.numeric(df$`Total Spending`)
+df$`Total Dosage Units`<- as.numeric(df$`Total Dosage Units`)
+df$`Total Claims` <- as.numeric(df$`Total Claims`)
+df$`Total Beneficiaries` <- as.numeric(df$`Total Beneficiaries`)
+df$`Average Spending Per Dosage Unit (Weighted)` <- as.numeric(df$`Average Spending Per Dosage Unit (Weighted)`)
+df$`Average Spending Per Claim`<- as.numeric(df$`Average Spending Per Claim`)
+df$`Average Spending Per Beneficiary` <- as.numeric(df$`Average Spending Per Beneficiary`)
+
+brandspec <- c("Crestor", "Lipitor", "Zocor")
+
+newdf <- df[df$'Brand Name' %in% brandspec, ]
+
+# Assuming 'newdf' is your filtered dataset
+# You may need to replace the column names with the actual column names in your dataset
+
+#colors assigned
+brandcolors <- c("Zocor" = "orchid", "Crestor" = "springgreen4", "Lipitor" = "navy")
+
+line_plot <- plot_ly(newdf, x = ~Year, y = ~`Average Spending Per Dosage Unit (Weighted)`, color = ~`Brand Name`, colors = brandcolors, type = 'scatter', mode = 'lines+markers') %>% 
+  layout(title = 'Average Spending Per Dosage Unit (2012-2021)', font = list(family = 'Gill Sans', color = 'gray7', size = 16),
+         xaxis = list(title = '',  font = list(family = 'Gill Sans', size = 12, color = 'gray7')),
+         yaxis = list(title = 'Price per dose (USD)', font = list(family = 'Gill Sans', size = 14, color = 'gray7')),
+         margin = list(l = 75, r = 50, b = 75, t = 50), 
+         plot_bgcolor = 'ivory1'
+  )
+
+line_plot
+
+```
+
+------------------------------------------------------------------------
+
+-   The prices of various prescription have been on the rise in the past decades
+
+-   These are some of the commonly used medications
+
+Statins- used to lower cholesterol levels
+
+-   The highest between 2014 and 2018
+
+### Inhalers {.no-padding}
+
+```{r echo=FALSE, message=FALSE}
+library(readr)
+library(readxl)
+library(plotly)
+df <- read_csv("https://raw.githubusercontent.com/sharonjepkosgei/sharonjepkosgei.github.io/main/df_revised.csv")
+
+df$`Brand Name` <- as.factor(df$`Brand Name`)
+df$`Generic Name` <- as.factor(df$`Generic Name`)
+df$Manufacturers <- as.integer(df$Manufacturers)
+df$Year <- as.integer(df$Year)
+df$`Total Spending` <- as.numeric(df$`Total Spending`)
+df$`Total Dosage Units`<- as.numeric(df$`Total Dosage Units`)
+df$`Total Claims` <- as.numeric(df$`Total Claims`)
+df$`Total Beneficiaries` <- as.numeric(df$`Total Beneficiaries`)
+df$`Average Spending Per Dosage Unit (Weighted)` <- as.numeric(df$`Average Spending Per Dosage Unit (Weighted)`)
+df$`Average Spending Per Claim`<- as.numeric(df$`Average Spending Per Claim`)
+df$`Average Spending Per Beneficiary` <- as.numeric(df$`Average Spending Per Beneficiary`)
+
+
+
+brandspec <- c("Proair HFA", "Proventil HFA")
+
+newdf <- df[df$'Brand Name' %in% brandspec, ]
+
+# Assuming 'newdf' is your filtered dataset
+# You may need to replace the column names with the actual column names in your dataset
+
+#colors assigned
+brandcolors <- c("Proair HFA" = "orchid", "Proventil HFA" = "navy")
+
+
+line_plot <- plot_ly(newdf, x = ~Year, y = ~`Average Spending Per Dosage Unit (Weighted)`, color = ~`Brand Name`, colors = brandcolors, type = 'scatter', mode = 'lines+markers') %>% 
+  layout(title = 'Average Spending Per Dosage Unit (2012-2021)', font = list(family = 'Gill Sans', color = 'gray7', size = 16),
+         xaxis = list(title = '',  font = list(family = 'Gill Sans', size = 12, color = 'gray7')),
+         yaxis = list(title = 'Price per dose (USD)', font = list(family = 'Gill Sans', size = 14, color = 'gray7')),
+         margin = list(l = 75, r = 50, b = 75, t = 50), 
+         plot_bgcolor = 'ivory1'
+  )
+
+line_plot
+
+```
+
+------------------------------------------------------------------------
+
+### Case Study: Diabetes Prescriptions {.no-padding}
+
+```{r echo=FALSE, message=FALSE}
+
+library(readr)
+library(readxl)
+library(plotly)
+df <- read_csv("https://raw.githubusercontent.com/sharonjepkosgei/sharonjepkosgei.github.io/main/df_revised.csv")
+
+df$`Brand Name` <- as.factor(df$`Brand Name`)
+df$`Generic Name` <- as.factor(df$`Generic Name`)
+df$Manufacturers <- as.integer(df$Manufacturers)
+df$Year <- as.integer(df$Year)
+df$`Total Spending` <- as.numeric(df$`Total Spending`)
+df$`Total Dosage Units`<- as.numeric(df$`Total Dosage Units`)
+df$`Total Claims` <- as.numeric(df$`Total Claims`)
+df$`Total Beneficiaries` <- as.numeric(df$`Total Beneficiaries`)
+df$`Average Spending Per Dosage Unit (Weighted)` <- as.numeric(df$`Average Spending Per Dosage Unit (Weighted)`)
+df$`Average Spending Per Claim`<- as.numeric(df$`Average Spending Per Claim`)
+df$`Average Spending Per Beneficiary` <- as.numeric(df$`Average Spending Per Beneficiary`)
+
+
+
+brandspec <- c("Apidra", "Humalog", "Lantus")
+
+newdf <- df[df$'Brand Name' %in% brandspec, ]
+
+# Assuming 'newdf' is your filtered dataset
+# You may need to replace the column names with the actual column names in your dataset
+
+#colors assigned
+brandcolors <- c("Apidra" = "orchid", "Lantus" = "springgreen4", "Humalog" = "navy")
+
+
+
+line_plot <- plot_ly(newdf, x = ~Year, y = ~`Average Spending Per Dosage Unit (Weighted)`, color = ~`Brand Name`, colors = brandcolors, type = 'scatter', mode = 'lines+markers') %>% 
+  layout(title = 'Average Spending Per Dosage Unit (2012-2021)', font = list(family = 'Gill Sans', color = 'gray7', size = 16),
+         xaxis = list(title = '',  font = list(family = 'Gill Sans', size = 12, color = 'gray7')),
+         yaxis = list(title = 'Price per dose (USD)', font = list(family = 'Gill Sans', size = 14, color = 'gray7')),
+         margin = list(l = 75, r = 50, b = 75, t = 50), 
+         plot_bgcolor = 'ivory1'
+  )
+
+line_plot
+
+```
+
+------------------------------------------------------------------------
+
+**Rising Prices**
+
+-   Over the past two decades pharmaceutical manufacturers have increased list prices on insulin each year
+-   Over 9 million Americans rely on insulin, and they have been raising red flags over soaring prices for years.
+
+**Trend**
+
+-   From January 2014 to April 2019
+
+-   The average cash price per insulin unit rose 54%
+
+-   Then, from January 2020 to July 2023, it dropped by 10.6%.
+
+### Diabetes Prescription Use Over time {.no-padding}
+
+```{r echo=FALSE, message=FALSE}
+
+library(plotly)
+
+# Read the data
+use <- vroom::vroom("https://raw.githubusercontent.com/sharonjepkosgei/sharonjepkosgei.github.io/main/data_files/use.csv", .name_repair = janitor::make_clean_names)
+
+# Convert 'year' to year with lubridate
+use$year <- as.Date(use$year)
+
+# Create the Plotly plot
+fig <- plot_ly(use, x = ~year)
+
+# Add traces for each line with non-default colors
+fig <- fig %>% add_trace(y = ~insulin_only_number_in_1000000s, type = 'scatter', mode = 'lines', line = list(color = 'navy', width = 2), name = 'Insulin')
+fig <- fig %>% add_trace(y = ~both_insulin_pills_number_in_1000000s, type = 'scatter', mode = 'lines', line = list(color = 'chocolate', width = 2), name = 'Insulin & Pills')
+
+# Add markers
+fig <- fig %>% add_markers(x = ~use$year[1], y = ~use$insulin_only_number_in_1000000s[1], marker = list(color = 'navy', size = 8))
+fig <- fig %>% add_markers(x = ~use$year[1], y = ~use$both_insulin_pills_number_in_1000000s[1], marker = list(color = 'chocolate', size = 8))
+fig <- fig %>% add_markers(x = ~use$year[nrow(use)], y = ~use$insulin_only_number_in_1000000s[nrow(use)], marker = list(color = 'navy', size = 8))
+fig <- fig %>% add_markers(x = ~use$year[nrow(use)], y = ~use$both_insulin_pills_number_in_1000000s[nrow(use)], marker = list(color = 'chocolate', size = 8))
+
+# Set layout options
+fig <- fig %>% layout(
+  title = "Diabetes Medication Use for Adults with Diabetes", font = list(size = 20, color = 'black', family = 'Arial', weight = 'bold'),
+  xaxis = list(title = "", showline = TRUE, showgrid = FALSE, showticklabels = TRUE, linecolor = 'rgb(204, 204, 204)', linewidth = 2),
+  yaxis = list(title = "Number in Millions", font = list(size = 18), showgrid = FALSE, zeroline = FALSE, showline = FALSE, showticklabels = FALSE),
+  autosize = FALSE,
+  margin = list(autoexpand = FALSE, l = 100, r = 100, t = 110),
+  showlegend = FALSE
+)
+
+
+# Add annotations for start and end points
+annotation1 <- list(
+  xref = 'paper',
+  yref = 'y',
+  x = 0.1,
+  y = use$insulin_only_number_in_1000000s[1],
+  xanchor = 'right',
+  yanchor = 'bottom',
+  text = paste(use$insulin_only_number_in_1000000s[1], 'M - Insulin'),
+  font = list(family = 'Arial', size = 16, color = 'navy'),
+  showarrow = FALSE
+)
+
+annotation2 <- list(
+  xref = 'paper',
+  yref = 'y',
+  x = 0.2,
+  y = use$both_insulin_pills_number_in_1000000s[1],
+  xanchor = 'right',
+  yanchor = 'top',
+  text = paste(use$both_insulin_pills_number_in_1000000s[1], 'M - Insulin & Pills '),
+  font = list(family = 'Arial', size = 16, color = 'chocolate'),
+  showarrow = FALSE
+)
+
+annotation_end <- list(
+  xref = 'paper',
+  x = 0.95,
+  y = use$insulin_only_number_in_1000000s[nrow(use)],
+  xanchor = 'left',
+  yanchor = 'top',
+  text = paste(use$insulin_only_number_in_1000000s[nrow(use)], 'M - Insulin'),
+  font = list(family = 'Arial', size = 16, color = 'navy'),
+  showarrow = FALSE
+)
+
+annotation_end2 <- list(
+  xref = 'paper',
+  x = 0.92,
+  y = use$both_insulin_pills_number_in_1000000s[nrow(use)],
+  xanchor = 'left',
+  yanchor = 'top',
+  text = paste(use$both_insulin_pills_number_in_1000000s[nrow(use)], 'M - Insulin & Pills'),
+  font = list(family = 'Arial', size = 16, color = 'chocolate'),
+  showarrow = FALSE
+)
+
+fig <- fig %>% layout(annotations = list(annotation1, annotation2, annotation_end, annotation_end2))
+
+# Print or view the plot
+fig
+```
+
+------------------------------------------------------------------------
+
+**High costs, High risks**
+
+-   A drop in diabetes medication use in 2018
+
+-   The high cost of insulin forced many people to ration the medication
+
+-   People in the U.S. either skip, delay or use less insulin than was needed in the year to save money
+
+-   Rationing can have dire consequences.
+
+### Comparing with Other Countries: 2018 {.no-padding}
+
+```{r echo=FALSE, message=FALSE}
+#install.packages("shadowtext")
+library(grid)
+library(tidyverse)
+library(shadowtext)
+# Read the data
+country_data <- read.csv("https://raw.githubusercontent.com/sharonjepkosgei/sharonjepkosgei.github.io/main/Country_data.csv")
+# Arrange data by Price in ascending order
+country_data <- country_data %>% arrange(Price)
+# Create the base plot
+plt <- ggplot(country_data) +
+  geom_col(aes(x= Price,y=reorder( Country, Price)), fill = "chocolate4", width = 0.8) +
+  theme_minimal() +
+  ylab("Countries")+
+  xlab("Average Price in Dollars($)")+
+  theme(
+    panel.grid.major.x = element_line(color = "#A8BAC4", size = 0.3),
+    axis.ticks.length = unit(0, "mm"),
+    axis.title.x = element_text(family = "Econ Sans Cnd", size = 16),
+    axis.title.y = element_blank(),
+    axis.line.y.left = element_line(color = "black"),
+    axis.text.y = element_blank(),
+    axis.text.x = element_text(family = "Econ Sans Cnd", size = 16)
+  )
+
+plt <- plt + 
+  scale_x_continuous(
+    limits = c(0, 105),
+    breaks = seq(0, 105, by = 10)
+  ) 
+# Add shadow text for Price < 10
+plt <- plt +
+  geom_shadowtext(
+    data = subset(country_data, Price < 20),
+    aes(Price, y = Country, label = Country),
+    hjust = 0,
+    nudge_x = 0.9,
+    colour = "chocolate4",
+    bg.colour = "white",
+    bg.r = 0.2,
+    size = 7
+  ) 
+
+# Add regular text for Price >= 10
+plt <- plt +
+  geom_text(
+    data = subset(country_data, Price >= 20),
+    aes(x = 0, y = Country, label = Country),
+    hjust = 0,
+    nudge_x = 0.4,
+    colour = "white",
+    size = 7
+  )
+
+
+
+plt <- plt +
+  labs(
+    title = "American Insulin Prices Compared to Selected Countries",
+    subtitle = "Average price per standard unit of insulin in 2018"
+  ) + 
+  theme(
+    plot.title = element_text(
+      face = "bold",
+      size = 14
+    ),
+    plot.subtitle = element_text(
+      size = 16
+    )
+  )
+
+# Make room for annotations
+plt <- plt + 
+  theme(
+    plot.margin = margin(0.05, 0, 0.1, 0.01, "npc")
+  ) 
+
+# Print the ggplot2 plot
+print(plt)
+
+```
+
+------------------------------------------------------------------------
+
+**Analysis**
+
+-   We found a possible explanation for the drop in diabetes prescription use in 2018.
+
+-   According to the chart, in 2018, the average list price for one vial of insulin in the U.S. was \$98.70
+
+-   Up to 10 times more than other countries in the OECD.
+
+**Why is this important**
+
+-   People with Type 1 diabetes need, on average 1 to 3 vials of insulin per month. 
+
+-   Patients with Type 2 diabetes don't always need to take insulin, but those who do can sometimes require more than people with Type 1 diabetes.
+
+### Insulin Regulation
+
+**Inflation Reduction Act (IRA)**
+
+-   It went into effect in January 2023
+
+-   Patients who are covered under the Medicare Part D plan now have a \$35 out-of-pocket monthly cap for their insulin.
+
+-   Higher rebates, even exceeding 100% of a drug's price, in cases when manufacturers have raised list prices sharply over time and have offered substantial rebates triggering large best price discounts.
+
+    **Effect of IRA on Manufacturers**
+
+    Under the IRA, manufacturers will face penalties in Medicare for raising list prices faster than inflation
+
+### Impact of Legislation: Consumers {.no-padding}
+
+```{r setup, include=FALSE}
+# Map IRA annual savings by state
+library(sf)
+library(readr)
+library(readxl)
+library(ggplot2)
+library(RColorBrewer)
+library(plotly)
+
+# Read shapefile
+download.file(
+  "https://github.com/abiburns/abiburns.github.io/raw/main/states.zip",
+  zip_path <- tempfile(fileext = ".zip")
+)
+unzip(zip_path, exdir = tempdir())
+setwd(tempdir())
+states <- st_read("states.shp")
+
+# Read csv
+url = "https://raw.githubusercontent.com/abiburns/abiburns.github.io/main/InflationReducationAct.csv"
+mapData <- read_csv(url)
+
+# Merge attribute
+map <- merge(states, mapData, by.x = "STATE_NAME", by.y = "State Name")
+head(map)
+
+# Download image
+download.file(
+  "https://github.com/abiburns/abiburns.github.io/raw/main/colorbarlegend.png",
+  "colorbarlegend.png",
+  mode = "wb")
+```
+
+```{r}
+# Plot states with graduated colors representing annual savings
+choropleth <- (
+  ggplot(data = map, 
+         aes(fill = `Average Annual Out-of-Pocket Savings Per Enrollee ($)`)) + 
+    labs(fill = "Average Annual Out-of-Pocket \nSavings Per Enrollee ($)") + 
+    theme(plot.title = element_text(hjust = 0.5),
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          axis.title.x=element_blank(), 
+          axis.text.x=element_blank(), 
+          axis.ticks.x=element_blank(), 
+          axis.title.y=element_blank(), 
+          axis.text.y=element_blank(), 
+          axis.ticks.y=element_blank()
+    ) + 
+    geom_sf() + 
+    geom_sf_text(aes(label = `STATE_ABBR`), size = 3) + 
+    coord_sf(xlim = c(-165, -70), ylim=c(21,62)) + 
+    scale_fill_gradientn(colours = brewer.pal(5, "Greens"),
+                         labels = c("$300", "$400","$500","$600","$700", "$800")
+                         ) + 
+    ggtitle("Inflation Reduction Act: Major Savings for Americans Who Use Insulin") + 
+    guides(fill = FALSE)
+)
+
+ggplotly(choropleth, tooltip="Average Annual Out-of-Pocket Savings Per Enrollee ($)")
+```
+
+------------------------------------------------------------------------
+
+The map shows the estimated out-of-pocket savings if IRA had been in effect in 2020, by state
+
+-   webscraped data from report
+
+-total savings to beneficiaries - \$734 million in Part D and \$27 million in Part B
+
+-   an average savings of approximately \$500 for those Medicare beneficiaries.
+
+-   The states with the most people with Medicare projected to benefit from the new IRA insulin cost savings:
+
+Texas -114,000 beneficiaries
+
+California -108,000
+
+Florida -90,000
+
+-   **Highest average annual out-of-pocket savings**
+
+North Dakota - \$805
+
+Iowa - \$725
+
+South Dakota - \$725
+
+### Impact of Legislation: Corporations {.no-padding}
+
+```{r echo=FALSE, message=FALSE}
+library(plotly)
+library(quantmod)
+
+library(plotly)
+library(quantmod)
+
+getSymbols("LLY",src='yahoo')
+
+df <- data.frame(Date=index(LLY),coredata(LLY))
+df <- tail(df, 365)
+df$ID <- seq.int(nrow(df))
+
+accumulate_by <- function(dat, var) {
+  var <- lazyeval::f_eval(var, dat)
+  lvls <- plotly:::getLevels(var)
+  dats <- lapply(seq_along(lvls), function(x) {
+    cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
+  })
+  dplyr::bind_rows(dats)
+}
+
+df <- df %>% accumulate_by(~ID)
+fig <- df %>% plot_ly(
+  x = ~ID, 
+  y = ~LLY.Close, 
+  frame = ~frame,
+  type = 'scatter', 
+  mode = 'lines', 
+  fill = 'tozeroy', 
+  fillcolor='lightblue',
+  line = list(color = 'navy'),
+  text = ~paste("Day: ", ID, "<br>Close: $", LLY.Close), 
+  hoverinfo = 'text'
+)
+fig <- fig %>% layout(
+  title = "Ely Lilly Stock Price in the Past Year",
+  yaxis = list(
+    title = "Closing Price", font = list(size = 16), tickfont = list(size = 16), 
+    range = c(0,700), 
+    zeroline = F,
+    tickprefix = "$"
+  ),
+  xaxis = list(
+    title = "Day", 
+    range = c(0,365), 
+    zeroline = F, 
+    showgrid = F
+  )
+) 
+fig <- fig %>% animation_opts(
+  frame = 20, 
+  transition = 0, 
+  redraw = FALSE
+)
+fig <- fig %>% animation_slider(
+  currentvalue = list(
+    prefix = "Day "
+  )
+)
+
+fig
+
+
+```
+
+------------------------------------------------------------------------
+
+**Impact of regulation:**
+
+-   Facing pressure to curb diabetes-treatment costs, Eli Lilly & Co. announced on March 1 that it is slashing insulin prices
+
+-   They immediately capped the out-of-pocket cost of all of its insulin at \$35 a month.
+
+-   The graph shows Eli Lilly & Co. stock prices from June 2022 to most recent data
+
+-   From the graph reduction in insulin price has not affected the bottom line of Eli Lilly & Co.
+
+**Future impact**
+
+-   IRA only applies to those with Medicare
+
+-   But, medicare is the largest single purchaser of prescription drugs in the US.
+
+-   This might further deter drug makers from increasing prices each year while offering greater rebates to insurers.
+
+### Impact of Legislation: Corporations {.no-padding}
+
+```{r echo=FALSE, message=FALSE}
+library(plotly)
+library(quantmod)
+
+getSymbols("NVO",src='yahoo')
+
+df <- data.frame(Date=index(NVO),coredata(NVO))
+df <- tail(df, 365)
+df$ID <- seq.int(nrow(df))
+
+accumulate_by <- function(dat, var) {
+  var <- lazyeval::f_eval(var, dat)
+  lvls <- plotly:::getLevels(var)
+  dats <- lapply(seq_along(lvls), function(x) {
+    cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
+  })
+  dplyr::bind_rows(dats)
+}
+
+df <- df %>% accumulate_by(~ID)
+fig <- df %>% plot_ly(
+  x = ~ID, 
+  y = ~NVO.Close, 
+  frame = ~frame,
+  type = 'scatter', 
+  mode = 'lines', 
+  fill = 'tozeroy', 
+  fillcolor='lightblue',
+  line = list(color = 'navy'),
+  text = ~paste("Day: ", ID, "<br>Close: $", NVO.Close), 
+  hoverinfo = 'text'
+)
+fig <- fig %>% layout(
+  title = "Novo Nordisk Stock Price in the Past Year", font = list(size = 12, weight = "bold"),
+  yaxis = list(
+    title = "Closing Price", font = list(size = 16), tickfont = list(size = 16), 
+    range = c(0,150), 
+    zeroline = F,
+    tickprefix = "$"
+  ),
+  xaxis = list(
+    title = "Day", 
+    range = c(0,365), 
+    zeroline = F, 
+    showgrid = F
+  )
+) 
+fig <- fig %>% animation_opts(
+  frame = 20, 
+  transition = 0, 
+  redraw = FALSE
+)
+fig <- fig %>% animation_slider(
+  currentvalue = list(
+    prefix = "Day "
+  )
+)
+
+fig
+
+```
+
+------------------------------------------------------------------------
+
+-   Novo Nordisk and Sanofi are other dominant insulin manufacturers that announced they have drastically lowered list prices and out-of-pocket costs in March 2023.
+
+-   Novo Nordisk stock prices have an upward trend
+
+### Impact of Insurance
+
+```{r echo=FALSE, message=FALSE}
+# Load necessary libraries
+library(tidyverse)
+library(plotly)
+
+# Read the data
+insurance <- read.csv("https://raw.githubusercontent.com/sharonjepkosgei/sharonjepkosgei.github.io/main/data_files/afford2.csv")
+
+
+# Create a Plotly plot
+plt3 <- plot_ly(insurance, x = ~col1, y = ~values, type = 'bar', color = ~insurance_status, colors = 'Paired', text = ~paste("status: ", insurance_status, "<br>Percent: ", values, "%")) %>%
+  layout(title = "Percentage of Diabetic People Reporting Affordability Problems", font = list(size = 12, color = 'black', family = 'Arial', weight = 'bold'),
+         xaxis = list(title = "Income as a percentage of federal poverty level (FPL)", font = list(size = 14), tickfont = list(size = 16)),
+         yaxis = list(title = "Percent", font = list(size = 14), tickfont = list(size = 16)),
+         legend = list(x = 0.9, y = 0.8),
+         hovermode = "closest",
+         barmode = "group",
+         legend = list(x = 0.6, y = 0.9,font = list(size = 16)),
+         showlegend = TRUE)
+
+# Print or view the plot
+plt3
+```
+
+------------------------------------------------------------------------
+
+The graph shows how affordability of prescription medication varies by:
+
+-   insurance, coverage type, and income.
+
+-   Affordability problems increase as income falls and are much higher among those without insurance coverage.
+
+-   People with diabetes enrolled in high-deductible plans report greater affordability problems than those in conventional private insurance plans.
+
+### Affordability
+
+```{r echo=FALSE, message=FALSE}
+# Read the data
+afford_data <- read.csv("https://raw.githubusercontent.com/sharonjepkosgei/sharonjepkosgei.github.io/main/afford.csv")
+library(tidyverse)
+
+# Data reshaping
+afford_data_long <- afford_data %>%
+  pivot_longer(cols = starts_with("X"), names_to = "Year", values_to = "Value")
+
+# Remove "X" from the Year column
+afford_data_long$Year <- gsub("X", "", afford_data_long$Year)
+
+# Replace underscores with hyphens in the Year column
+afford_data_long$Year <- gsub("_", "-", afford_data_long$Year)
+
+# Reorder the levels of Year
+afford_data_long$Year <- factor(afford_data_long$Year, levels = c("2014-2017", "2010-2013", "2007-2009"))
+
+# Create a stacked bar chart
+ggplot(afford_data_long, aes(x = Column1, y = Value, fill = Year)) + 
+  geom_bar(stat = "identity") +
+  labs(title = "Diabetic People With Difficulty Affording Prescriptions",
+       x = "Income as percentage of federal poverty level (FPL)",
+       y = "Percent") +
+  scale_fill_brewer(palette = "Paired") +
+  theme_minimal() +
+  theme(
+    legend.position = c(0.9, 0.8),
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    axis.text.x = element_text(face = "bold", size = 10, angle = 60, hjust = 0.5, vjust = 0.6),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14)
+  )
+
+```
+
+------------------------------------------------------------------------
+
+**The Affordable Care Act (ACA)**
+
+-   Prices increased rapidly between 2007 and 2017
+
+-   But, coverage expansions reduced the share of those with diabetes in each income group who reported difficulty affording prescription drugs.
+
+-   The greatest declines have been among people with incomes between 100 percent and 300 percent of the federal poverty level
+
+### Takeaways
+
+Our analysis suggests that the most important factors affecting the affordability of insulin:
+
+-   the availability of coverage
+
+-   the form of that coverage
+
+People with adequate coverage are often shielded from these price increases.
+
+**Medicaid expansion**
+
+people with diabetes who can enroll in Medicaid are protected from:
+
+-   high out-of-pocket costs for prescription
+
+-   high costs for other dimensions of their care
