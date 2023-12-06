@@ -19,7 +19,9 @@ website:
         text: Database Project
       - href: dvz project.qmd
         text: Data Visualization Project
-  
+
+body-footer:
+  To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
       
 format:
   html:
