@@ -3,5 +3,3 @@ title: "Abigail Burns"
 ---
 
 Welcome to my Quarto website where I host projects, data stories and more.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
