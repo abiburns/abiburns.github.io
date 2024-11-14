@@ -4,13 +4,13 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "I am a graduate student at the University of Texas at Dallas studying a Master of Science in Social Data Analytics and Research. I currently serve as GIS Analyst for the Town of Prosper in the Dallas-Fort Worth region of Texas."
+    "text": "I am a graduate student at the University of Texas at Dallas studying a Master of Science in Social Data Analytics and Research. I currently serve as GIS Analyst for AECOM, an infrastructure consulting firm in Dallas, Texas."
   },
   {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Abigail Burns",
     "section": "",
-    "text": "Welcome to my Quarto website where I host projects, data stories and more.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
+    "text": "Welcome to my Quarto website where I host projects, data stories and more. I am a graduate student at the University of Texas at Dallas studying a Master of Science in Social Data Analytics and Research. I currently serve as GIS Analyst for AECOM, an infrastructure consulting firm in Dallas, Texas. \nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
   }
 ]
