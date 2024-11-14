@@ -1,5 +1,0 @@
----
-title: "About"
----
-
-I am a graduate student at the University of Texas at Dallas studying a Master of Science in Social Data Analytics and Research. I currently serve as GIS Analyst for the Town of Prosper in the Dallas-Fort Worth region of Texas.
