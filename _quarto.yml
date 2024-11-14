@@ -13,8 +13,6 @@ website:
         text: About
       - href: resume.qmd
         text: Resume
-      - href: assignments.qmd
-        text: Assignments
       - href: db project.qmd
         text: Database Project
       - href: dvz project.qmd
