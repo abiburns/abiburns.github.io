@@ -17,6 +17,15 @@ website:
         text: Data Visualization Project
       - href: assignments.qmd
         text: KM Assignments
+        menu:
+          - href: assignment1.qmd
+            text: Assignment 1
+          - href: assignment2.qmd
+            text: Assignment 2
+          - href: assignment3.qmd
+            text: Assignment 3
+          - href: assignment4.qmd
+            text: Assignment 4
 
 body-footer:
   To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
