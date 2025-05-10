@@ -15,9 +15,10 @@ website:
         text: Database Project
       - href: dvz project.qmd
         text: Data Visualization Project
-      - href: assignments.qmd
-        text: KM Assignments
+      - text: Knowledge Mining
         menu:
+          - href: "Burns_Proposal.pdf"
+            text: Research Proposal
           - href: assignment1.qmd
             text: Assignment 1
           - href: assignment2.qmd
