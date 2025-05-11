@@ -22,14 +22,14 @@ website:
           - href: "Burns_Proposal.pdf"
             target: _blank
             text: Research Proposal
-          - href: assignment1.qmd
-            text: Assignment 1
           - href: assignment2.qmd
             text: Assignment 2
           - href: assignment3.qmd
             text: Assignment 3
           - href: assignment4.qmd
             text: Assignment 4
+          - href: assignment5.qmd
+            text: Assignment 5
 
 body-footer:
   To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
