@@ -11,6 +11,13 @@
     "href": "index.html",
     "title": "Abigail Burns",
     "section": "",
-    "text": "Welcome to my Quarto website where I host projects, data stories and more. I am a graduate student at the University of Texas at Dallas studying a Master of Science in Social Data Analytics and Research. I currently serve as GIS Analyst for AECOM, an infrastructure consulting firm in Dallas, Texas. \nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
+    "text": "Welcome to my Quarto website where I host projects, data stories and more. I am a graduate student at the University of Texas at Dallas studying a Master of Science in Social Data Analytics and Research. I currently serve as GIS Analyst for AECOM, an engineering consulting firm in Dallas, Texas."
+  },
+  {
+    "objectID": "db project.html",
+    "href": "db project.html",
+    "title": "Train Schedule built with shinyapps",
+    "section": "",
+    "text": "DART weekday schedule\n\n\nDART weekend schedule"
   }
 ]
