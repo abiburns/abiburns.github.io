@@ -9,15 +9,18 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: resume.qmd
+      - href: "Burns_Resume202401.pdf"
+        target: _blank
         text: Resume
       - href: db project.qmd
         text: Database Project
-      - href: dvz project.qmd
+      - href: "Group_finalproject_alt.html"
+        target: _blank
         text: Data Visualization Project
       - text: Knowledge Mining
         menu:
           - href: "Burns_Proposal.pdf"
+            target: _blank
             text: Research Proposal
           - href: assignment1.qmd
             text: Assignment 1
