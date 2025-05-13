@@ -1,3 +1,78 @@
 ---
 title: "Assignment 2"
+author: "Abigail Burns"
+format: html
+editor: visual
 ---
+
+#### Run an exploratory data analysis with R using the TEDS2016 dataset.
+
+```{r}
+library(haven)
+TEDS_2016 <- read_stata("TEDS_2016.dta")
+TEDS_2016$PartyID <- factor(TEDS_2016$PartyID, labels=c("KMT","DPP","NP","PFP", "TSU","NPP","NA"))
+```
+
+#### What problems do you encounter when working with this dataset?
+
+The dataset has a standard deviation of zero.
+
+```{r}
+library(ggplot2)
+ggplot(TEDS_2016, aes(PartyID)) + 
+  geom_bar(aes(y = (after_stat(count))/sum(after_stat(count)),fill=PartyID)) + 
+  scale_y_continuous(labels=scales::percent) +
+  ylab("Party Support (%)") + 
+  xlab("Taiwan Political Parties") + 
+  theme_bw() + 
+  scale_fill_manual(values=c("steel blue","forestgreen","khaki1","orange","goldenrod","yellow","grey"))
+```
+
+#### How should you deal with missing values?
+
+```{r}
+TEDS_2016 <- na.omit(TEDS_2016)
+```
+
+#### Explore the relationship between Tondu and other variables female, DPP, age, income, edu, Taiwanese, and Econ_worse. What methods would you use?
+
+```{r}
+TEDS_2016$Tondu <- factor(TEDS_2016$Tondu, labels=c("Unification now","Status quo, unif. in future","Status quo, decide later","Status quo forever","Status quo, indep. in future","Independence now","No response"))
+table(TEDS_2016$Tondu, TEDS_2016$female)
+table(TEDS_2016$Tondu, TEDS_2016$DPP)
+table(TEDS_2016$Tondu, TEDS_2016$income)
+table(TEDS_2016$Tondu, TEDS_2016$edu)
+table(TEDS_2016$Tondu, TEDS_2016$Taiwanese)
+table(TEDS_2016$Tondu, TEDS_2016$Econ_worse)
+```
+
+```{r}
+library(caret)
+oneHot <- dummyVars(~., data=TEDS_2016)
+TEDS_OneHot <- data.frame(predict(oneHot, TEDS_2016))
+model.lm <- lm(Tondu.Independence.now ~ 
+                 DPP + age + edu + Taiwanese + Econ_worse + pubwelf5,
+               data = TEDS_OneHot)
+summary(model.lm)
+```
+
+#### Now explore the votetsai variable (vote for DPP candidate Tsai Ing-wen).
+
+It would be redundant to include [both]{.underline} DPP and votetsai in a linear model.
+
+```{r}
+table(TEDS_2016$Tondu, TEDS_2016$votetsai)
+```
+
+#### Generate a frequency table and bar chart of the Tondu variable with labels.
+
+```{r}
+ggplot(TEDS_2016, aes(Tondu)) + 
+  geom_bar(aes(y = (after_stat(count))/sum(after_stat(count)),fill=Tondu)) + 
+  scale_y_continuous(labels=scales::percent) +
+  ylab("Tondu Support (%)") + 
+  xlab("Taiwan Tondu Attitudes") + 
+  theme_bw() + 
+  scale_fill_manual(values=c(
+    "red","orange","yellow","goldenrod","steelblue","blue","grey"))
+```
