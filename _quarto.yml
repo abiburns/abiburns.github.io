@@ -22,6 +22,8 @@ website:
           - href: "Burns_Proposal.pdf"
             target: _blank
             text: Research Proposal
+          - href: pfc.qmd
+            text: Prepare for Class
           - href: assignment2.qmd
             text: Assignment 2
           - href: assignment3.qmd
