@@ -9,7 +9,7 @@ editor: visual
 
 ```{r}
 library(haven)
-TEDS_2016 <- read_stata("TEDS_2016.dta")
+TEDS_2016 <- read_stata("https://github.com/datageneration/home/blob/master/DataProgramming/data/TEDS_2016.dta?raw=true")
 TEDS_2016$PartyID <- factor(TEDS_2016$PartyID, labels=c("KMT","DPP","NP","PFP", "TSU","NPP","NA"))
 ```
 
