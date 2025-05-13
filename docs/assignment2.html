@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Abigail Burns">
 
 <title>Assignment 2 – abiburns.github.io</title>
 <style>
@@ -19,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -71,6 +107,8 @@ ul.task-list li input[type="checkbox"] {
 
 <link rel="stylesheet" href="styles.css">
 <meta property="og:title" content="Assignment 2 – abiburns.github.io">
+<meta property="og:description" content="">
+<meta property="og:image" content="assignment2_files/figure-html/unnamed-chunk-2-1.png">
 <meta property="og:site_name" content="abiburns.github.io">
 </head>
 
@@ -160,6 +198,12 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Abigail Burns </p>
+          </div>
+  </div>
     
   
     
@@ -170,8 +214,200 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="run-an-exploratory-data-analysis-with-r-using-the-teds2016-dataset." class="level4">
+<h4 class="anchored" data-anchor-id="run-an-exploratory-data-analysis-with-r-using-the-teds2016-dataset.">Run an exploratory data analysis with R using the TEDS2016 dataset.</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(haven)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>TEDS_2016 <span class="ot">&lt;-</span> <span class="fu">read_stata</span>(<span class="st">"TEDS_2016.dta"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>TEDS_2016<span class="sc">$</span>PartyID <span class="ot">&lt;-</span> <span class="fu">factor</span>(TEDS_2016<span class="sc">$</span>PartyID, <span class="at">labels=</span><span class="fu">c</span>(<span class="st">"KMT"</span>,<span class="st">"DPP"</span>,<span class="st">"NP"</span>,<span class="st">"PFP"</span>, <span class="st">"TSU"</span>,<span class="st">"NPP"</span>,<span class="st">"NA"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="what-problems-do-you-encounter-when-working-with-this-dataset" class="level4">
+<h4 class="anchored" data-anchor-id="what-problems-do-you-encounter-when-working-with-this-dataset">What problems do you encounter when working with this dataset?</h4>
+<p>The dataset has a standard deviation of zero.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ggplot2' was built under R version 4.4.3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(TEDS_2016, <span class="fu">aes</span>(PartyID)) <span class="sc">+</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">y =</span> (<span class="fu">after_stat</span>(count))<span class="sc">/</span><span class="fu">sum</span>(<span class="fu">after_stat</span>(count)),<span class="at">fill=</span>PartyID)) <span class="sc">+</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels=</span>scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Party Support (%)"</span>) <span class="sc">+</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Taiwan Political Parties"</span>) <span class="sc">+</span> </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"steel blue"</span>,<span class="st">"forestgreen"</span>,<span class="st">"khaki1"</span>,<span class="st">"orange"</span>,<span class="st">"goldenrod"</span>,<span class="st">"yellow"</span>,<span class="st">"grey"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assignment2_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="how-should-you-deal-with-missing-values" class="level4">
+<h4 class="anchored" data-anchor-id="how-should-you-deal-with-missing-values">How should you deal with missing values?</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>TEDS_2016 <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(TEDS_2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="explore-the-relationship-between-tondu-and-other-variables-female-dpp-age-income-edu-taiwanese-and-econ_worse.-what-methods-would-you-use" class="level4">
+<h4 class="anchored" data-anchor-id="explore-the-relationship-between-tondu-and-other-variables-female-dpp-age-income-edu-taiwanese-and-econ_worse.-what-methods-would-you-use">Explore the relationship between Tondu and other variables female, DPP, age, income, edu, Taiwanese, and Econ_worse. What methods would you use?</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>TEDS_2016<span class="sc">$</span>Tondu <span class="ot">&lt;-</span> <span class="fu">factor</span>(TEDS_2016<span class="sc">$</span>Tondu, <span class="at">labels=</span><span class="fu">c</span>(<span class="st">"Unification now"</span>,<span class="st">"Status quo, unif. in future"</span>,<span class="st">"Status quo, decide later"</span>,<span class="st">"Status quo forever"</span>,<span class="st">"Status quo, indep. in future"</span>,<span class="st">"Independence now"</span>,<span class="st">"No response"</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(TEDS_2016<span class="sc">$</span>Tondu, TEDS_2016<span class="sc">$</span>female)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              
+                                 0   1
+  Unification now               10   8
+  Status quo, unif. in future   89  42
+  Status quo, decide later     183 168
+  Status quo forever            86 114
+  Status quo, indep. in future 144 126
+  Independence now              34  39
+  No response                    8  23</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(TEDS_2016<span class="sc">$</span>Tondu, TEDS_2016<span class="sc">$</span>DPP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              
+                                 0   1
+  Unification now               18   0
+  Status quo, unif. in future  105  26
+  Status quo, decide later     222 129
+  Status quo forever           149  51
+  Status quo, indep. in future  87 183
+  Independence now              18  55
+  No response                   24   7</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(TEDS_2016<span class="sc">$</span>Tondu, TEDS_2016<span class="sc">$</span>income)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              
+                                1  2  3  4  5  6  7  8  9 10
+  Unification now               6  3  1  0  0  4  0  1  2  1
+  Status quo, unif. in future  18 10  9 11 17 14 10 15 12 15
+  Status quo, decide later     36 31 36 25 42 42 31 43 29 36
+  Status quo forever           44 18 17 17 13 16 15 20 18 22
+  Status quo, indep. in future 31 19 18 30 29 20 33 28 28 34
+  Independence now             23  6  5  4  7  5  5  5  4  9
+  No response                  18  4  3  1  4  0  0  0  0  1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(TEDS_2016<span class="sc">$</span>Tondu, TEDS_2016<span class="sc">$</span>edu)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              
+                                 1   2   3   4   5
+  Unification now                6   3   7   0   2
+  Status quo, unif. in future   20  10  41  22  38
+  Status quo, decide later      37  34  95  47 138
+  Status quo forever            39  29  55  21  56
+  Status quo, indep. in future  23  21  65  21 140
+  Independence now              19   7  21   6  20
+  No response                   26   2   2   0   1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(TEDS_2016<span class="sc">$</span>Tondu, TEDS_2016<span class="sc">$</span>Taiwanese)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              
+                                 0   1
+  Unification now               12   6
+  Status quo, unif. in future   96  35
+  Status quo, decide later     159 192
+  Status quo forever            86 114
+  Status quo, indep. in future  31 239
+  Independence now               1  72
+  No response                    8  23</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(TEDS_2016<span class="sc">$</span>Tondu, TEDS_2016<span class="sc">$</span>Econ_worse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              
+                                 0   1
+  Unification now               10   8
+  Status quo, unif. in future   60  71
+  Status quo, decide later     140 211
+  Status quo forever            98 102
+  Status quo, indep. in future 107 163
+  Independence now              19  54
+  No response                   17  14</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: lattice</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>oneHot <span class="ot">&lt;-</span> <span class="fu">dummyVars</span>(<span class="sc">~</span>., <span class="at">data=</span>TEDS_2016)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>TEDS_OneHot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">predict</span>(oneHot, TEDS_2016))</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>model.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(Tondu.Independence.now <span class="sc">~</span> </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                 DPP <span class="sc">+</span> age <span class="sc">+</span> edu <span class="sc">+</span> Taiwanese <span class="sc">+</span> Econ_worse <span class="sc">+</span> pubwelf5,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> TEDS_OneHot)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model.lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = Tondu.Independence.now ~ DPP + age + edu + Taiwanese + 
+    Econ_worse + pubwelf5, data = TEDS_OneHot)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.18663 -0.10980 -0.06334  0.00276  1.01239 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  0.153614   0.054533   2.817 0.004939 ** 
+DPP          0.056240   0.016670   3.374 0.000768 ***
+age         -0.001355   0.000617  -2.197 0.028247 *  
+edu         -0.018459   0.006685  -2.761 0.005854 ** 
+Taiwanese    0.064875   0.017197   3.772 0.000171 ***
+Econ_worse   0.018735   0.015904   1.178 0.239037    
+pubwelf5    -0.011122   0.006624  -1.679 0.093432 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.2442 on 1067 degrees of freedom
+Multiple R-squared:  0.06485,   Adjusted R-squared:  0.05959 
+F-statistic: 12.33 on 6 and 1067 DF,  p-value: 1.856e-13</code></pre>
+</div>
+</div>
+</section>
+<section id="now-explore-the-votetsai-variable-vote-for-dpp-candidate-tsai-ing-wen." class="level4">
+<h4 class="anchored" data-anchor-id="now-explore-the-votetsai-variable-vote-for-dpp-candidate-tsai-ing-wen.">Now explore the votetsai variable (vote for DPP candidate Tsai Ing-wen).</h4>
+<p>It would be redundant to include <u>both</u> DPP and votetsai in a linear model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(TEDS_2016<span class="sc">$</span>Tondu, TEDS_2016<span class="sc">$</span>votetsai)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                              
+                                 0   1
+  Unification now               13   5
+  Status quo, unif. in future   90  41
+  Status quo, decide later     154 197
+  Status quo forever           116  84
+  Status quo, indep. in future  33 237
+  Independence now               8  65
+  No response                    4  27</code></pre>
+</div>
+</div>
+</section>
+<section id="generate-a-frequency-table-and-bar-chart-of-the-tondu-variable-with-labels." class="level4">
+<h4 class="anchored" data-anchor-id="generate-a-frequency-table-and-bar-chart-of-the-tondu-variable-with-labels.">Generate a frequency table and bar chart of the Tondu variable with labels.</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(TEDS_2016, <span class="fu">aes</span>(Tondu)) <span class="sc">+</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">y =</span> (<span class="fu">after_stat</span>(count))<span class="sc">/</span><span class="fu">sum</span>(<span class="fu">after_stat</span>(count)),<span class="at">fill=</span>Tondu)) <span class="sc">+</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels=</span>scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Tondu Support (%)"</span>) <span class="sc">+</span> </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Taiwan Tondu Attitudes"</span>) <span class="sc">+</span> </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values=</span><span class="fu">c</span>(</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"red"</span>,<span class="st">"orange"</span>,<span class="st">"yellow"</span>,<span class="st">"goldenrod"</span>,<span class="st">"steelblue"</span>,<span class="st">"blue"</span>,<span class="st">"grey"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="assignment2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
