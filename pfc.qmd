@@ -26,3 +26,15 @@ editor: visual
     -   Alternatives: word embedding (e.g. Word2Vec)
 
 -   RSS (Really Simple Syndication): method of summarizing updates and information from online sources in a lightweight form (usually XML)
+
+-   AGI (Artificial General Intelligence): machine with strong or human-level intelligence, capable of general cognitive abilities including reasoning, problem-solving, perception, learning, and language comprehension
+
+-   Foundation Model: large, pre-trained neural network that can be adapted for various tasks
+
+-   RAG (Retrieval-Augmented Generation): machine learning technique that enhances the accuracy and relevant of large language models (LLMs) by incorporating information from external knowledge bases
+
+    -   Retrieval: mechanism to find relevant information from external sources like databases, documents, or web pages
+
+    -   Contextualization: retrieved information is combined with user's original query
+
+    -   Generalization: LLM uses combined information to generate a response that is more accurate and relevant to the user's question
