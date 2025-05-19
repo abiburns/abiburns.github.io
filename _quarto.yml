@@ -12,18 +12,16 @@ website:
       - href: "Burns_Resume202401.pdf"
         target: _blank
         text: Resume
-      - href: db project.qmd
+      - href: "https://abiburns.shinyapps.io/DARTweekday"
+        target: _blank
         text: Database Project
       - href: "Group_finalproject_alt.html"
         target: _blank
         text: Data Visualization Project
       - text: Knowledge Mining
         menu:
-          - href: "Burns_Proposal.pdf"
-            target: _blank
-            text: Research Proposal
           - href: pfc.qmd
-            text: Prepare for Class
+            text: Class Notes
           - href: assignment2.qmd
             text: Assignment 2
           - href: assignment3.qmd
@@ -32,6 +30,15 @@ website:
             text: Assignment 4
           - href: assignment5.qmd
             text: Assignment 5
+          - href: "Burns_Proposal.pdf"
+            target: _blank
+            text: Project Proposal
+          - href: "https://abiburns.shinyapps.io/weather/"
+            target: _blank
+            text: Project Application
+          - href: "Burns_Report.pdf"
+            target: _blank
+            text: Project Report
 
 body-footer:
   To learn more about Quarto websites visit <https://quarto.org/docs/websites>.

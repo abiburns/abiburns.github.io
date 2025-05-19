@@ -2,16 +2,12 @@
 title: "Abigail Burns"
 ---
 
-::: columns
-::: {.column width=40%}
-
+::::: columns
+::: {.column width="40%"}
 ![](PP.png){width="251"}
-
 :::
 
-::: {.column width=60%}
-
-Welcome to my Quarto website where I host projects, data stories and more. I am a graduate student at the University of Texas at Dallas studying a Master of Science in Social Data Analytics and Research. I currently serve as GIS Analyst for AECOM, an engineering consulting firm in Dallas, Texas.
-
+::: {.column width="60%"}
+Welcome to my Quarto website where I host projects, data stories and more. I am a graduate student studying a Master of Science in Social Data Analytics and Research at UT Dallas. I currently serve as GIS Analyst for AECOM, an engineering consulting firm in Dallas, Texas.
 :::
-:::
+:::::

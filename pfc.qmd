@@ -1,3 +1,28 @@
 ---
 title: "Prepare for Class"
+author: "Abigail Burns"
+format: html
+editor: visual
 ---
+
+### Natural Language Basics
+
+#### [Stages of NLP:]{.underline}
+
+1.  Sentence Segmentation
+2.  Word Tokenization
+3.  Text Lemmatization
+4.  Stop Words
+5.  Dependency Parsing
+6.  Named Entity Recognition (NER)
+7.  Coreference Resolution
+
+#### [Vocab/Terminology:]{.underline}
+
+-   TF-IDF (Term Frequency-Inverse Document Frequency): statistical measure used to evaluate the importance of a word in a document relative to a collection of documents; considers words' frequency across the entire corpus
+
+    -   Cons: lacks semantic understanding, doesn't account for word order
+
+    -   Alternatives: word embedding (e.g. Word2Vec)
+
+-   RSS (Really Simple Syndication): method of summarizing updates and information from online sources in a lightweight form (usually XML)

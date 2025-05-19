@@ -1,3 +1,8 @@
 ---
 title: "Assignment 4"
+author: "Abigail Burns"
+format: html
+editor: visual
 ---
+
+#### How can you improve the text prediction?

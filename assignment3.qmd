@@ -1,3 +1,24 @@
 ---
 title: "Assignment 3"
+author: "Abigail Burns"
+format: html
+editor: visual
 ---
+
+```{r}
+library(readxl)
+results <- read_excel("prompt_exercise.xlsx")
+results
+```
+
+<p>[ChatGPT Result 1](chatgpt_1.pdf)</p>
+
+<p>[Copilot Result 1](copilot_1.pdf)</p>
+
+<p>[Grok 3 Result 1](grok_1.pdf)</p>
+
+<p>[ChatGPT Result 2](chatgpt_2.pdf)</p>
+
+<p>[Copilot Result 2](copilot_2.pdf)</p>
+
+<p>[Grok 3 Result 2](grok_2.pdf)</p>
