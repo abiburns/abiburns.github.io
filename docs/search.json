@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "Abigail Burns",
     "section": "",
-    "text": "Welcome to my Quarto website where I host projects, data stories and more. I am a graduate student at the University of Texas at Dallas studying a Master of Science in Social Data Analytics and Research. I currently serve as GIS Analyst for AECOM, an engineering consulting firm in Dallas, Texas."
+    "text": "Welcome to my Quarto website where I host projects, data stories and more. I am a graduate student studying a Master of Science in Social Data Analytics and Research at UT Dallas. I currently serve as GIS Analyst for AECOM, an engineering consulting firm in Dallas, Texas."
   },
   {
     "objectID": "db project.html",
@@ -32,6 +32,34 @@
     "href": "assignment3.html",
     "title": "Assignment 3",
     "section": "",
-    "text": "library(readxl)\nresults &lt;- read_excel(\"prompt_exercise.xlsx\")\nresults\n\n# A tibble: 3 × 11\n  Prompt         `AI Model` Methodology Key Findings Summari…¹ `Trends and Gaps`\n  &lt;chr&gt;          &lt;chr&gt;      &lt;lgl&gt;       &lt;lgl&gt;                  &lt;lgl&gt;            \n1 Conduct a 1,0… ChatGPT    TRUE        NA                     NA               \n2 Conduct a 1,0… Copilot    TRUE        NA                     NA               \n3 Conduct a 1,0… Grok 3     TRUE        NA                     NA               \n# ℹ abbreviated name: ¹​`Key Findings Summarized`\n# ℹ 6 more variables: `Hypothesis Testable Relevant` &lt;lgl&gt;,\n#   `Academic Tone` &lt;lgl&gt;, `PDF Output` &lt;lgl&gt;,\n#   `Systematic Review Format` &lt;lgl&gt;, Notes &lt;lgl&gt;, `Total Score` &lt;lgl&gt;\n\n\n\nChatGPT Result 1\n\n\nCopilot Result 1\n\n\nGrok 3 Result 1\n\n\nChatGPT Result 2\n\n\nCopilot Result 2\n\n\nGrok 3 Result 2"
+    "text": "Results Scoring\n\n\nChatGPT Result 1\n\n\nCopilot Result 1\n\n\nGrok 3 Result 1\n\n\nChatGPT Result 2\n\n\nCopilot Result 2\n\n\nGrok 3 Result 2"
+  },
+  {
+    "objectID": "pfc.html",
+    "href": "pfc.html",
+    "title": "Prepare for Class",
+    "section": "",
+    "text": "Natural Language Basics\n\nStages of NLP:\n\nSentence Segmentation\nWord Tokenization\nText Lemmatization\nStop Words\nDependency Parsing\nNamed Entity Recognition (NER)\nCoreference Resolution\n\n\n\nVocab/Terminology:\n\nTF-IDF (Term Frequency-Inverse Document Frequency): statistical measure used to evaluate the importance of a word in a document relative to a collection of documents; considers words’ frequency across the entire corpus\n\nCons: lacks semantic understanding, doesn’t account for word order\nAlternatives: word embedding (e.g. Word2Vec)\n\nRSS (Really Simple Syndication): method of summarizing updates and information from online sources in a lightweight form (usually XML)\nAGI (Artificial General Intelligence): machine with strong or human-level intelligence, capable of general cognitive abilities including reasoning, problem-solving, perception, learning, and language comprehension\nFoundation Model: large, pre-trained neural network that can be adapted for various tasks\nRAG (Retrieval-Augmented Generation): machine learning technique that enhances the accuracy and relevant of large language models (LLMs) by incorporating information from external knowledge bases\n\nRetrieval: mechanism to find relevant information from external sources like databases, documents, or web pages\nContextualization: retrieved information is combined with user’s original query\nGeneralization: LLM uses combined information to generate a response that is more accurate and relevant to the user’s question"
+  },
+  {
+    "objectID": "assignment4.html",
+    "href": "assignment4.html",
+    "title": "Assignment 4",
+    "section": "",
+    "text": "How can you improve the text prediction?"
+  },
+  {
+    "objectID": "kmproject.html",
+    "href": "kmproject.html",
+    "title": "City Weather Explorer built with shinyapps",
+    "section": "",
+    "text": "Project Report\n\n\nCity Weather Explorer"
+  },
+  {
+    "objectID": "dbproject.html",
+    "href": "dbproject.html",
+    "title": "Train Schedule built with shinyapps",
+    "section": "",
+    "text": "DART weekday schedule\n\n\nDART weekend schedule"
   }
 ]
