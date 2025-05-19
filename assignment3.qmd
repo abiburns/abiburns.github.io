@@ -4,12 +4,7 @@ author: "Abigail Burns"
 format: html
 editor: visual
 ---
-
-```{r}
-library(readxl)
-results <- read_excel("prompt_exercise.xlsx")
-results
-```
+<p>[Results Scoring](prompt_exercise.xlsx)</p>
 
 <p>[ChatGPT Result 1](chatgpt_1.pdf)</p>
 
