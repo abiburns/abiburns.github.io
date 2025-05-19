@@ -15,7 +15,7 @@ class Toolbox(object):
         " a Draft FIRM or FRD file geodatabase."
 
         # List of tool classes associated with this toolbox
-        self.tools = [Remove_Add_SpatialIndex, MatchCodes, EndStationSelect, StartStations]
+        self.tools = [Remove_Add_SpatialIndex, MatchCodes, EndStationSelect, StartStations, Indx_Wtr_Features]
 
 
 class Remove_Add_SpatialIndex(object):
@@ -100,7 +100,7 @@ class MatchCodes(object):
     def execute(self, parameters, messages):
         folder = parameters[0].valueAsText
         fcs = parameters[1].valueAsText
-        arcpy.AddMessage("Converting to shapefile (NOTE: May need to increase field length).")
+        arcpy.AddMessage("Converting to shapefile (NOTE: May need to increase field lengths).")
         arcpy.conversion.FeatureClassToShapefile(fcs, folder)
         arcpy.env.workspace = folder
         for shp in arcpy.ListFiles("*.shp"):
@@ -153,11 +153,8 @@ class MatchCodes(object):
                         '1080': "Millimeters / Hour",
                         'NP': "NP"
                         }
-                        if str([VEL_UNIT]) in D_Velocity_Units:
-                            x = D_Velocity_Units[VEL_UNIT]
-                            return x
-                        else:
-                            return [VEL_UNIT]
+                        x = D_Velocity_Units[VEL_UNIT]
+                        return x
                     """,
                         field_type="TEXT",
                         enforce_domains="NO_ENFORCE_DOMAINS"
@@ -421,6 +418,7 @@ class MatchCodes(object):
                         expression_type="PYTHON3",
                         code_block="""def MatchDescrip(HYDRA_MDL):
                         D_Hydra_Mdl = {
+                        ' ': "",
                         '0110': "CHAN for Windows v. 2.03 (1997)",
                         '0120': "Culvert Master v. 2.0 (September 2000) and up",
                         '1001': "DHM 21 and 34 (Aug. 1987)",
@@ -497,6 +495,7 @@ class MatchCodes(object):
                         expression_type="PYTHON3",
                         code_block="""def MatchDescrip(HYDRO_MDL):
                         D_Hydro_Mdl = {
+                        ' ': "",
                         '2000': "AHYMO 97 (Aug. 1997)",
                         '2001': "CUHPF/PC (May 1996 and May 2002)",
                         '2006': "HEC-1 4.0.1 and up 1 (May 1991)",
@@ -757,6 +756,12 @@ class StartStations(object):
                 out_feature_class="Start_pts", 
                 point_location="END")
         ptcoint = arcpy.management.GetCount("Start_pts")
+    # Delete duplicate points
+        arcpy.management.DeleteIdentical(
+            in_dataset="S_Stn_Start",
+            fields="SHAPE",
+            xy_tolerance=None,
+            z_tolerance=0)
     # Get summary statistics for joined start points
         arcpy.analysis.Statistics(
             in_table="Start_pts",
@@ -778,7 +783,7 @@ class StartStations(object):
     field="START_ID",
     expression="CalcThis()",
     expression_type="PYTHON3",
-    code_block="""Base = 0
+    code_block="""Base = 100
 def CalcThis():
     global Base
     Base += 1
@@ -794,4 +799,131 @@ def CalcThis():
             field_type="TEXT",
             enforce_domains="NO_ENFORCE_DOMAINS")  
         arcpy.AddMessage("Generated and attributed {0} station start points.".format(ptcoint))
+    # Delete intermediate files
+        arcpy.management.Delete(
+            "WTR_LN_Dissolve", '')
+        arcpy.AddMessage("Deleted intermediate file")
+
+
+class Indx_Wtr_Features(object):
+    def __init__(self):
+        self.label = "Index Water Features"
+        self.description = "Select major water features by name and attribute to show on FIRM Index."
+        
+    def getParameterInfo(self):
+    # Define parameters
+        wl = arcpy.Parameter(
+            name='Water Lines',
+            displayName='Water Lines',
+            datatype='GPFeatureLayer',
+            direction='Input',
+            parameterType='Required',
+            multiValue = False
+        )
+        wl.filter.list = ["Line"]
+        wa = arcpy.Parameter(
+            name='Water Polygons',
+            displayName='Water Polygons',
+            datatype='GPFeatureLayer',
+            direction='Input',
+            parameterType='Required',
+            multiValue = False
+        )
+        wa.filter.list = ["Polygon"]
+        params = [wl, wa]
+        return params
+
+    def isLicensed(self):
+        return True
+
+    def updateParameters(self, parameters):
+        return
+
+    def updateMessages(self, parameters):
+        return
+
+    def execute(self, parameters, messages):
+        wl = parameters[0].valueAsText
+        wa = parameters[1].valueAsText
+        ## Water Lines
+        # First make sure all are turned off (SHOWN_INDX = "F")
+        all = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=wl,
+            selection_type="NEW_SELECTION",
+            where_clause="SHAPE_Length IS NOT NULL",
+            invert_where_clause=None
+        )
+        arcpy.management.CalculateField(
+            in_table=all,
+            field="SHOWN_INDX",
+            expression='"F"',
+            expression_type="PYTHON3",
+            code_block="",
+            field_type="TEXT",
+            enforce_domains="NO_ENFORCE_DOMAINS"
+        )
+        # Next select major names
+        major = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=wl,
+            selection_type="NEW_SELECTION",
+            where_clause="WTR_NM LIKE '%CREEK%' Or WTR_NM LIKE '%RIVER%' Or WTR_NM LIKE '%BAYOU%' Or WTR_NM LIKE '%BRANCH%'",
+            invert_where_clause=None
+        )
+        # Then exclude tributaries and numbered streams
+        nonum = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=major,
+            selection_type="SUBSET_SELECTION",
+            where_clause="WTR_NM NOT LIKE '%TRIBUTARY%' And WTR_NM NOT LIKE '%1%' And WTR_NM NOT LIKE '%2%' And WTR_NM NOT LIKE '%3%' And WTR_NM NOT LIKE '%4%' And WTR_NM NOT LIKE '%5%' And WTR_NM NOT LIKE '%6%' And WTR_NM NOT LIKE '%7%' And WTR_NM NOT LIKE '%8%' And WTR_NM NOT LIKE '%9%'",
+            invert_where_clause=None
+        )
+        # Then exclude streams with direction
+        nodir = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=nonum,
+            selection_type="SUBSET_SELECTION",
+            where_clause="WTR_NM NOT LIKE '%NORTH%' And WTR_NM NOT LIKE '%EAST%' And WTR_NM NOT LIKE '%SOUTH%' And WTR_NM NOT LIKE '%WEST%'",
+            invert_where_clause=None
+        )
+        arcpy.management.CalculateField(
+            in_table=nodir,
+            field="SHOWN_INDX",
+            expression='"T"',
+            expression_type="PYTHON3",
+            code_block="",
+            field_type="TEXT",
+            enforce_domains="NO_ENFORCE_DOMAINS"
+        )
+        ## Water Polygons
+        # First make sure all are turned off (SHOWN_INDX = "F")
+        all = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=wa,
+            selection_type="NEW_SELECTION",
+            where_clause="SHAPE_Length IS NOT NULL",
+            invert_where_clause=None
+        )
+        arcpy.management.CalculateField(
+            in_table=all,
+            field="SHOWN_INDX",
+            expression='"F"',
+            expression_type="PYTHON3",
+            code_block="",
+            field_type="TEXT",
+            enforce_domains="NO_ENFORCE_DOMAINS"
+        )
+        # Next select named
+        major = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=wa,
+            selection_type="NEW_SELECTION",
+            where_clause="WTR_NM <> 'NP' And WTR_NM NOT LIKE '%noname%' And WTR_NM NOT LIKE '%no name%' And WTR_NM NOT LIKE '%No Name%'",
+            invert_where_clause=None
+        )
+        arcpy.management.CalculateField(
+            in_table=major,
+            field="SHOWN_INDX",
+            expression='"T"',
+            expression_type="PYTHON3",
+            code_block="",
+            field_type="TEXT",
+            enforce_domains="NO_ENFORCE_DOMAINS"
+        )
+
                 
