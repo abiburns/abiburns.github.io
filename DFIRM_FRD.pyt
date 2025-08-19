@@ -681,24 +681,24 @@ class EndStationSelect(object):
                 step_value=1)
         for item in s_array:
             count += 1
-            arcpy.SetProgressorLabel("Selecting feature {0} of {1}...".format(count, strms))
+            arcpy.SetProgressorLabel(f"Selecting feature {count} of {strms}...")
             arcpy.SetProgressorPosition()
             string = str(item)
             split = string.split("' ")
             part1 = split[0]
             name = part1[2:]
-            qname = "'{0}'".format(name)
+            qname = f"'{name}'"
             part2 = split[1]
             end = part2.index("]")
             station = int(float(part2[:end]))
-            wc = "WTR_NM = {0}".format(qname) + " And STREAM_STN = {0}".format(station)
+            wc = f"WTR_NM = {qname}" + f" And STREAM_STN = {station}"
             arcpy.management.SelectLayerByAttribute(
                 in_layer_or_view=fc,
                 selection_type="ADD_TO_SELECTION",
                 where_clause=wc,
                 invert_where_clause=None
             )     
-        arcpy.AddMessage("Selected {0} cross sections.".format(count))
+        arcpy.AddMessage(f"Selected {count} cross sections.")
         arcpy.SetProgressorLabel("Exporting new feature class...")
         arcpy.conversion.ExportFeatures(fc, "End_XS")
         arcpy.AddMessage("Exported new feature class to current workspace gdb.")
@@ -755,7 +755,7 @@ class StartStations(object):
                 in_features="WTR_LN_Dissolve", 
                 out_feature_class="Start_pts", 
                 point_location="END")
-        ptcoint = arcpy.management.GetCount("Start_pts")
+        ptcount = arcpy.management.GetCount("Start_pts")
     # Delete duplicate points
         arcpy.management.DeleteIdentical(
             in_dataset="S_Stn_Start",
@@ -798,7 +798,7 @@ def CalcThis():
             code_block="",
             field_type="TEXT",
             enforce_domains="NO_ENFORCE_DOMAINS")  
-        arcpy.AddMessage("Generated and attributed {0} station start points.".format(ptcoint))
+        arcpy.AddMessage(f"Generated and attributed {ptcount} station start points.")
     # Delete intermediate files
         arcpy.management.Delete(
             "WTR_LN_Dissolve", '')
@@ -844,17 +844,13 @@ class Indx_Wtr_Features(object):
 
     def execute(self, parameters, messages):
         wl = parameters[0].valueAsText
+        wl_fields = arcpy.ListFields(wl)
         wa = parameters[1].valueAsText
+        wa_fields = arcpy.ListFields(wa)
         ## Water Lines
         # First make sure all are turned off (SHOWN_INDX = "F")
-        all = arcpy.management.SelectLayerByAttribute(
-            in_layer_or_view=wl,
-            selection_type="NEW_SELECTION",
-            where_clause="SHAPE_Length IS NOT NULL",
-            invert_where_clause=None
-        )
         arcpy.management.CalculateField(
-            in_table=all,
+            in_table=wl,
             field="SHOWN_INDX",
             expression='"F"',
             expression_type="PYTHON3",
@@ -883,8 +879,22 @@ class Indx_Wtr_Features(object):
             where_clause="WTR_NM NOT LIKE '%NORTH%' And WTR_NM NOT LIKE '%EAST%' And WTR_NM NOT LIKE '%SOUTH%' And WTR_NM NOT LIKE '%WEST%'",
             invert_where_clause=None
         )
+        nodir2 = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=nodir,
+            selection_type="SUBSET_SELECTION",
+            where_clause="WTR_NM NOT LIKE '%North%' And WTR_NM NOT LIKE '%East%' And WTR_NM NOT LIKE '%South%' And WTR_NM NOT LIKE '%West%'",
+            invert_where_clause=None
+        )
+        # Then exclude unnamed streams
+        named = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=nodir2,
+            selection_type="SUBSET_SELECTION",
+            where_clause="WTR_NM NOT LIKE '%NP%' And WTR_NM NOT LIKE '%Unnamed%' And WTR_NM NOT LIKE '%UNT%'",
+            invert_where_clause=None
+        )
+        wl_count = arcpy.management.GetCount(named)
         arcpy.management.CalculateField(
-            in_table=nodir,
+            in_table=named,
             field="SHOWN_INDX",
             expression='"T"',
             expression_type="PYTHON3",
@@ -892,16 +902,11 @@ class Indx_Wtr_Features(object):
             field_type="TEXT",
             enforce_domains="NO_ENFORCE_DOMAINS"
         )
+        arcpy.AddMessage(f"Turned on {wl_count} water line features.")
         ## Water Polygons
         # First make sure all are turned off (SHOWN_INDX = "F")
-        all = arcpy.management.SelectLayerByAttribute(
-            in_layer_or_view=wa,
-            selection_type="NEW_SELECTION",
-            where_clause="SHAPE_Length IS NOT NULL",
-            invert_where_clause=None
-        )
         arcpy.management.CalculateField(
-            in_table=all,
+            in_table=wa,
             field="SHOWN_INDX",
             expression='"F"',
             expression_type="PYTHON3",
@@ -913,11 +918,19 @@ class Indx_Wtr_Features(object):
         major = arcpy.management.SelectLayerByAttribute(
             in_layer_or_view=wa,
             selection_type="NEW_SELECTION",
-            where_clause="WTR_NM <> 'NP' And WTR_NM NOT LIKE '%noname%' And WTR_NM NOT LIKE '%no name%' And WTR_NM NOT LIKE '%No Name%'",
+            where_clause="WTR_NM NOT LIKE '%NP%' And WTR_NM NOT LIKE '%noname%' And WTR_NM NOT LIKE '%no name%' And WTR_NM NOT LIKE '%No Name%'",
             invert_where_clause=None
         )
+        # Then exclude numbered lakes
+        nonum = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=major,
+            selection_type="SUBSET_SELECTION",
+            where_clause="WTR_NM NOT LIKE '%1%' And WTR_NM NOT LIKE '%2%' And WTR_NM NOT LIKE '%3%' And WTR_NM NOT LIKE '%4%' And WTR_NM NOT LIKE '%5%' And WTR_NM NOT LIKE '%6%' And WTR_NM NOT LIKE '%7%' And WTR_NM NOT LIKE '%8%' And WTR_NM NOT LIKE '%9%'",
+            invert_where_clause=None
+        )
+        wa_count = arcpy.management.GetCount(nonum)
         arcpy.management.CalculateField(
-            in_table=major,
+            in_table=nonum,
             field="SHOWN_INDX",
             expression='"T"',
             expression_type="PYTHON3",
@@ -925,5 +938,6 @@ class Indx_Wtr_Features(object):
             field_type="TEXT",
             enforce_domains="NO_ENFORCE_DOMAINS"
         )
+        arcpy.AddMessage(f"Turned on {wa_count} water area features.")
 
                 
