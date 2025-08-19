@@ -812,6 +812,13 @@ class Indx_Wtr_Features(object):
         
     def getParameterInfo(self):
     # Define parameters
+        fgdb = arcpy.Parameter(
+            name='Input Workspace',
+            displayName='Input Workspace',
+            datatype='DEWorkspace',
+            direction='Input',
+            parameterType='Required'
+        )
         wl = arcpy.Parameter(
             name='Water Lines',
             displayName='Water Lines',
@@ -830,7 +837,7 @@ class Indx_Wtr_Features(object):
             multiValue = False
         )
         wa.filter.list = ["Polygon"]
-        params = [wl, wa]
+        params = [fgdb, wl, wa]
         return params
 
     def isLicensed(self):
@@ -843,10 +850,10 @@ class Indx_Wtr_Features(object):
         return
 
     def execute(self, parameters, messages):
-        wl = parameters[0].valueAsText
-        wl_fields = arcpy.ListFields(wl)
-        wa = parameters[1].valueAsText
-        wa_fields = arcpy.ListFields(wa)
+        fgdb = parameters[0].valueAsText
+        wl = parameters[1].valueAsText
+        wa = parameters[2].valueAsText
+        arcpy.env.workspace = fgdb
         ## Water Lines
         # First make sure all are turned off (SHOWN_INDX = "F")
         arcpy.management.CalculateField(
@@ -858,11 +865,28 @@ class Indx_Wtr_Features(object):
             field_type="TEXT",
             enforce_domains="NO_ENFORCE_DOMAINS"
         )
+        # Next select all not named NP
+        notnp = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=wl,
+            selection_type="NEW_SELECTION",
+            where_clause="WTR_NM <> 'NP' And WTR_NM NOT LIKE '%UNT%'",
+            invert_where_clause=None
+        )
+        # Next make names title case 
+        arcpy.management.CalculateField(
+            in_table=notnp,
+            field="WTR_NM",
+            expression="!WTR_NM!.title()",
+            expression_type="PYTHON3",
+            code_block="",
+            field_type="TEXT",
+            enforce_domains="NO_ENFORCE_DOMAINS"
+        )
         # Next select major names
         major = arcpy.management.SelectLayerByAttribute(
             in_layer_or_view=wl,
             selection_type="NEW_SELECTION",
-            where_clause="WTR_NM LIKE '%CREEK%' Or WTR_NM LIKE '%RIVER%' Or WTR_NM LIKE '%BAYOU%' Or WTR_NM LIKE '%BRANCH%'",
+            where_clause="WTR_NM LIKE '%Creek%' Or WTR_NM LIKE '%River%' Or WTR_NM LIKE '%Bayou%' Or WTR_NM LIKE '%Branch%'",
             invert_where_clause=None
         )
         # Then exclude tributaries and numbered streams
@@ -876,23 +900,67 @@ class Indx_Wtr_Features(object):
         nodir = arcpy.management.SelectLayerByAttribute(
             in_layer_or_view=nonum,
             selection_type="SUBSET_SELECTION",
-            where_clause="WTR_NM NOT LIKE '%NORTH%' And WTR_NM NOT LIKE '%EAST%' And WTR_NM NOT LIKE '%SOUTH%' And WTR_NM NOT LIKE '%WEST%'",
-            invert_where_clause=None
-        )
-        nodir2 = arcpy.management.SelectLayerByAttribute(
-            in_layer_or_view=nodir,
-            selection_type="SUBSET_SELECTION",
             where_clause="WTR_NM NOT LIKE '%North%' And WTR_NM NOT LIKE '%East%' And WTR_NM NOT LIKE '%South%' And WTR_NM NOT LIKE '%West%'",
             invert_where_clause=None
         )
         # Then exclude unnamed streams
         named = arcpy.management.SelectLayerByAttribute(
-            in_layer_or_view=nodir2,
+            in_layer_or_view=nodir,
             selection_type="SUBSET_SELECTION",
             where_clause="WTR_NM NOT LIKE '%NP%' And WTR_NM NOT LIKE '%Unnamed%' And WTR_NM NOT LIKE '%UNT%'",
             invert_where_clause=None
         )
-        wl_count = arcpy.management.GetCount(named)
+        # Lastly exclude by length
+        wl_fields = []
+        wlf = arcpy.ListFields(wl)
+        for f in wlf:
+            wl_fields.append(f.name)
+        long_enough = []
+        if "SHAPE_Length" in wl_fields:
+            arcpy.analysis.Statistics(
+                in_table=named,
+                out_table=rf"{fgdb}\Length_Statistics",
+                statistics_fields="SHAPE_Length SUM",
+                case_field="WTR_NM",
+                concatenation_separator=""
+            )
+            cursor = arcpy.da.SearchCursor(
+            rf"{fgdb}\Length_Statistics", 
+            ['OBJECTID', 'WTR_NM', 'SUM_SHAPE_Length']
+            )
+            for row in cursor:
+                if row[2] >= 0.22:
+                    long_enough.append(row[1])
+                else:
+                    continue
+        elif "SHAPE_Leng" in wl_fields:
+            arcpy.analysis.Statistics(
+                in_table=named,
+                out_table=rf"{fgdb}\Length_Statistics",
+                statistics_fields="SHAPE_Leng SUM",
+                case_field="WTR_NM",
+                concatenation_separator=""
+            )
+            cursor = arcpy.da.SearchCursor(
+            rf"{fgdb}\Length_Statistics", 
+            ['OBJECTID', 'WTR_NM', 'SUM_SHAPE_Leng']
+            )
+            for row in cursor:
+                if row[2] >= 0.22:
+                    long_enough.append(row[1])
+                else:
+                    continue
+        # arcpy.AddMessage(long_enough)
+        # Turn list into tuple for valid expression
+        long_enough = tuple(long_enough)
+        final = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=wl,
+            selection_type="NEW_SELECTION",
+            where_clause=f"WTR_NM IN {long_enough}",
+            invert_where_clause=None
+        )
+        wl_count = arcpy.management.GetCount(final)
+        # Turn selected features on
         arcpy.management.CalculateField(
             in_table=named,
             field="SHOWN_INDX",
@@ -918,10 +986,20 @@ class Indx_Wtr_Features(object):
         major = arcpy.management.SelectLayerByAttribute(
             in_layer_or_view=wa,
             selection_type="NEW_SELECTION",
-            where_clause="WTR_NM NOT LIKE '%NP%' And WTR_NM NOT LIKE '%noname%' And WTR_NM NOT LIKE '%no name%' And WTR_NM NOT LIKE '%No Name%'",
+            where_clause="WTR_NM NOT LIKE '%NP%' And WTR_NM NOT LIKE '%NONAME%' And WTR_NM NOT LIKE '%noname%' And WTR_NM NOT LIKE '%no name%' And WTR_NM NOT LIKE '%No Name%' And WTR_NM NOT LIKE '%Unnamed%' And WTR_NM NOT LIKE '%UNNAMED%'",
             invert_where_clause=None
         )
-        # Then exclude numbered lakes
+        # Next make names title case 
+        arcpy.management.CalculateField(
+            in_table=major,
+            field="WTR_NM",
+            expression="!WTR_NM!.title()",
+            expression_type="PYTHON3",
+            code_block="",
+            field_type="TEXT",
+            enforce_domains="NO_ENFORCE_DOMAINS"
+        )
+        # Lastly exclude numbered lakes
         nonum = arcpy.management.SelectLayerByAttribute(
             in_layer_or_view=major,
             selection_type="SUBSET_SELECTION",
@@ -929,6 +1007,7 @@ class Indx_Wtr_Features(object):
             invert_where_clause=None
         )
         wa_count = arcpy.management.GetCount(nonum)
+        # Turn selected features on
         arcpy.management.CalculateField(
             in_table=nonum,
             field="SHOWN_INDX",
