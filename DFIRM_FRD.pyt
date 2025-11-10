@@ -15,7 +15,7 @@ class Toolbox(object):
         " a Draft FIRM or FRD file geodatabase."
 
         # List of tool classes associated with this toolbox
-        self.tools = [Remove_Add_SpatialIndex, MatchCodes, EndStationSelect, StartStations, Indx_Wtr_Features]
+        self.tools = [Remove_Add_SpatialIndex, MatchCodes_FC, MatchCodes_TBL, EndStationSelect, StartStations, Indx_Wtr_Features, Append_XS_Elev]
 
 
 class Remove_Add_SpatialIndex(object):
@@ -62,9 +62,9 @@ class Remove_Add_SpatialIndex(object):
                     arcpy.management.AddSpatialIndex(in_features=fc)
                     arcpy.AddMessage(f"Added spatial index for {fc}")
 
-class MatchCodes(object):
+class MatchCodes_FC(object):
     def __init__(self):
-        self.label = "Codes to Descriptions"
+        self.label = "Codes to Descriptions (Feature Classes)"
         self.description = "Convert input feature classes to shapefiles," \
         " then iterate through the shapefiles and replace domain codes with their matching descriptions."
 
@@ -72,7 +72,7 @@ class MatchCodes(object):
         # Define parameters
         folder = arcpy.Parameter(
             name='Output Folder',
-            displayName='Output Folder',
+            displayName='Output Folder (NOTE: Do not use a folder already containing shapefiles)',
             datatype='DEFolder',
             direction='Input',
             parameterType='Required'
@@ -186,6 +186,34 @@ class MatchCodes(object):
                         field_type="TEXT",
                         enforce_domains="NO_ENFORCE_DOMAINS"
                     )
+                if field.name == 'AREA_UNIT':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        shp,
+                        "AREA_UNIT",
+                        expression="MatchDescrip(!AREA_UNIT!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(AREA_UNIT):
+                        D_Area_Units = {
+                        ' ': " ",
+                        '1000': "Acres",
+                        '1010': "Hectares",
+                        '1020': "Square Feet",
+                        'Square Feet': "Square Feet",
+                        '1030': "Square Meters",
+                        'Square Meters': "Square Meters",
+                        '1040': "Square Yards",
+                        '1050': "Square Miles",
+                        'Square Miles': "Square Miles",
+                        '1060': "Square Kilometers",
+                        'NP': "NP"
+                        }
+                        x = D_Area_Units[AREA_UNIT]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
                 if field.name == 'LN_TYP':
                     count += 1
                     arcpy.management.CalculateField(
@@ -204,6 +232,28 @@ class MatchCodes(object):
                         '2050': "Flowage Easement Boundary"
                         }
                         x = D_Ln_Typ[LN_TYP]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'XS_LN_TYP':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        shp,
+                        "XS_LN_TYP",
+                        expression="MatchDescrip(!XS_LN_TYP!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(XS_LN_TYP):
+                        D_Ln_Typ = {
+                        '1010': "LETTERED, MAPPED",
+                        'LETTERED, MAPPED': "LETTERED, MAPPED",
+                        '1020': "NOT LETTERED, MAPPED",
+                        'NOT LETTERED, MAPPED': "NOT LETTERED, MAPPED",
+                        '1030': "NOT LETTERED, NOT MAPPED",
+                        'NOT LETTERED, NOT MAPPED': "NOT LETTERED, NOT MAPPED"
+                        }
+                        x = D_Ln_Typ[XS_LN_TYP]
                         return x
                     """,
                         field_type="TEXT",
@@ -311,6 +361,28 @@ class MatchCodes(object):
                         field_type="TEXT",
                         enforce_domains="NO_ENFORCE_DOMAINS"
                     )
+                if field.name == 'LOC_ACC':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        shp,
+                        "LOC_ACC",
+                        expression="MatchDescrip(!LOC_ACC!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(LOC_ACC):
+                        D_Mtg_Typ = {
+                        'H': "High",
+                        'High': "High",
+                        'M': "Medium",
+                        'Medium': "Medium",
+                        'L': "Low",
+                        'Low': "Low"
+                        }
+                        x = D_Mtg_Typ[LOC_ACC]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
                 if field.name == 'SCALE':
                     count += 1
                     arcpy.management.CalculateField(
@@ -340,11 +412,32 @@ class MatchCodes(object):
                         expression_type="PYTHON3",
                         code_block="""def MatchDescrip(BASE_TYP):
                         D_Basemap_Typ = {
+                        ' ': " ",
                         '1000': "Orthophoto",
                         '2000': "Vector",
                         'NP': "NP"
                         }
                         x = D_Basemap_Typ[BASE_TYP]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'BASIN_TYP':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        shp,
+                        "BASIN_TYP",
+                        expression="MatchDescrip(!BASIN_TYP!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(BASIN_TYP):
+                        D_Subbasin_Typ = {
+                        'HYD': "Hydrologic Analyses",
+                        'NP': "NP",
+                        'HUC8': "USGS HUC-8",
+                        'USGS HUC-8': "USGS HUC-8"
+                        }
+                        x = D_Subbasin_Typ[BASIN_TYP]
                         return x
                     """,
                         field_type="TEXT",
@@ -633,7 +726,945 @@ class MatchCodes(object):
                         field_type="TEXT",
                         enforce_domains="NO_ENFORCE_DOMAINS"
                     )
+                if field.name == 'STRUCT_TYP':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        shp,
+                        "STRUCT_TYP",
+                        expression="MatchDescrip(!STRUCT_TYP!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(STRUCT_TYP):
+                        D_Struct_Typ = {
+                        ' ': " ",
+                        '1000': "Aqueduct",
+                        '1001': "Bridge",
+                        'Bridge': "Bridge",
+                        '1002': "Canal",
+                        '1003': "Channel",
+                        '1006': "Control Structure",
+                        'Control Structure': "Control Structure",
+                        '1007': "Culvert",
+                        'Culvert': "Culvert",
+                        '1010': "Dam",
+                        'Dam': "Dam",
+                        '1012': "Dock",
+                        '1013': "Drop Structure",
+                        '1014': "Energy Dissipater",
+                        '1015': "Fish Ladder",
+                        '1017': "Flume",
+                        '1018': "Footbridge",
+                        '1019': "Gate",
+                        '1020': "Jetty",
+                        '1021': "Levee",
+                        '1022': "Lock",
+                        '1023': "Penstock",
+                        '1024': "Pier",
+                        '1025': "Pump Station",
+                        'Pump Station': "Pump Station",
+                        '1026': "Seawall",
+                        '1027': "Side Weir Structure",
+                        '1028': "Storm Sewer",
+                        'Storm Sewer': "Storm Sewer",
+                        '1029': "Utility Crossing",
+                        'Utility Crossing': "Utility Crossing",
+                        '1030': "Weir",
+                        'Weir': "Weir",
+                        '1031': "Wing Wall",
+                        '1036': "Floodway Contained in Structure",
+                        '1037': "Pipeline",
+                        '1038': "Retaining Wall",
+                        '1039': "Revetment",
+                        '1040': "Siphon",
+                        'NP': "NP",
+                        '1033': "0.2-Percent-Annual-Chance Flood Discharge Contained in Structure",
+                        '0.2-Percent-Annual-Chance Flood Discharge Contained in Structure': "0.2-Percent-Annual-Chance Flood Discharge Contained in Structure",
+                        '1032': "1-Percent-Annual-Chance Flood Discharge Contained in Structure",
+                        '1-Percent-Annual-Chance Flood Discharge Contained in Structure': "1-Percent-Annual-Chance Flood Discharge Contained in Structure",
+                        '9000': "Other / Misc. Structure"
+                        }
+                        x = D_Struct_Typ[STRUCT_TYP]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'NODE_TYP':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        shp,
+                        "NODE_TYP",
+                        expression="MatchDescrip(!NODE_TYP!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(NODE_TYP):
+                        D_Node_Typ = {
+                        ' ': " ",
+                        '1000': "Diversion",
+                        '1010': "Junction",
+                        'Junction': "Junction",
+                        '1020': "Reservoir",
+                        '1030': "Structure",
+                        '1040': "Sub-Basin Outlet"
+                        }
+                        x = D_Node_Typ[NODE_TYP]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
             arcpy.AddMessage(f"Converted {count} fields in {shp}.")
+
+
+class MatchCodes_TBL(object):
+    def __init__(self):
+        self.label = "Codes to Descriptions (Tables)"
+        self.description = "Convert input geodatabase tables to standalone tables," \
+        " then iterate through the standalone tables and replace domain codes with their matching descriptions."
+
+    def getParameterInfo(self):
+        # Define parameters
+        folder = arcpy.Parameter(
+            name='Output Folder',
+            displayName='Output Folder (NOTE: Do not use a folder already containing standalone tables)',
+            datatype='DEFolder',
+            direction='Input',
+            parameterType='Required'
+        )
+        tbs = arcpy.Parameter(
+            name='DB Tables',
+            displayName='DB Tables',
+            datatype='GPTableView',
+            direction='Input',
+            parameterType='Required',
+            multiValue = True
+        )
+        params = [folder, tbs]
+        return params
+
+    def isLicensed(self):
+        return True
+
+    def updateParameters(self, parameters):
+        return
+
+    def updateMessages(self, parameters):
+        return
+
+    def execute(self, parameters, messages):
+        folder = parameters[0].valueAsText
+        tbs = parameters[1].valueAsText
+        arcpy.AddMessage("Converting to standalone table (NOTE: May need to increase field lengths).")
+        tbs = tbs.split(";")
+        # arcpy.AddMessage(f"{tbs}")
+        for tb in tbs:
+            arcpy.conversion.TableToTable(
+                tb, 
+                folder, 
+                f"{tb}.dbf"
+                )
+        arcpy.env.workspace = folder
+        for dbf in arcpy.ListFiles("*.dbf"):
+            fields = arcpy.ListFields(dbf)
+            count = 0
+            for field in fields:
+                if field.name == 'VEL_UNIT':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "VEL_UNIT",
+                        expression="MatchDescrip(!VEL_UNIT!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(VEL_UNIT):
+                        D_Velocity_Units = {
+                        ' ': " ",
+                        '1000': "Centimeters / Day",
+                        '1010': "Centimeters / Hour",
+                        '1020': "Feet / Second",
+                        'Feet / Second': "Feet / Second",
+                        '1030': "Inches / Day",
+                        '1040': "Inches / Hour",
+                        '1050': "Meters / Second",
+                        'Meters / Second': "Meters / Second",
+                        '1060': "Micrometers / Second",
+                        '1070': "Millimeters / Day",
+                        '1080': "Millimeters / Hour",
+                        'NP': "NP"
+                        }
+                        x = D_Velocity_Units[VEL_UNIT]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'LEN_UNIT':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "LEN_UNIT",
+                        expression="MatchDescrip(!LEN_UNIT!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(LEN_UNIT):
+                        D_Length_Units = {
+                        ' ': " ",
+                        'CM': "Centimeters",
+                        'FT': "Feet",
+                        'Feet': "Feet",
+                        'IN': "Inches",
+                        'KM': "Kilometers",
+                        'M': "Meters",
+                        'MI': "Miles",
+                        'MM': "Millimeters",
+                        'USFT': "U.S. Survey Feet",
+                        'NP': "NP"
+                        }
+                        x = D_Length_Units[LEN_UNIT]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'WSEL_UNIT':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "WSEL_UNIT",
+                        expression="MatchDescrip(!WSEL_UNIT!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(WSEL_UNIT):
+                        D_Length_Units = {
+                        ' ': " ",
+                        'CM': "Centimeters",
+                        'FT': "Feet",
+                        'Feet': "Feet",
+                        'IN': "Inches",
+                        'KM': "Kilometers",
+                        'M': "Meters",
+                        'MI': "Miles",
+                        'MM': "Millimeters",
+                        'USFT': "U.S. Survey Feet",
+                        'NP': "NP"
+                        }
+                        x = D_Length_Units[WSEL_UNIT]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'STRUCT_TYP':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "STRUCT_TYP",
+                        expression="MatchDescrip(!STRUCT_TYP!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(STRUCT_TYP):
+                        D_Struct_Typ = {
+                        ' ': " ",
+                        '1000': "Aqueduct",
+                        '1001': "Bridge",
+                        'Bridge': "Bridge",
+                        '1002': "Canal",
+                        '1003': "Channel",
+                        '1006': "Control Structure",
+                        'Control Structure': "Control Structure",
+                        '1007': "Culvert",
+                        'Culvert': "Culvert",
+                        '1010': "Dam",
+                        'Dam': "Dam",
+                        '1012': "Dock",
+                        '1013': "Drop Structure",
+                        '1014': "Energy Dissipater",
+                        '1015': "Fish Ladder",
+                        '1017': "Flume",
+                        '1018': "Footbridge",
+                        '1019': "Gate",
+                        '1020': "Jetty",
+                        '1021': "Levee",
+                        '1022': "Lock",
+                        '1023': "Penstock",
+                        '1024': "Pier",
+                        '1025': "Pump Station",
+                        'Pump Station': "Pump Station",
+                        '1026': "Seawall",
+                        '1027': "Side Weir Structure",
+                        '1028': "Storm Sewer",
+                        'Storm Sewer': "Storm Sewer",
+                        '1029': "Utility Crossing",
+                        'Utility Crossing': "Utility Crossing",
+                        '1030': "Weir",
+                        'Weir': "Weir",
+                        '1031': "Wing Wall",
+                        '1036': "Floodway Contained in Structure",
+                        '1037': "Pipeline",
+                        '1038': "Retaining Wall",
+                        '1039': "Revetment",
+                        '1040': "Siphon",
+                        'NP': "NP",
+                        '1033': "0.2-Percent-Annual-Chance Flood Discharge Contained in Structure",
+                        '0.2-Percent-Annual-Chance Flood Discharge Contained in Structure': "0.2-Percent-Annual-Chance Flood Discharge Contained in Structure",
+                        '1032': "1-Percent-Annual-Chance Flood Discharge Contained in Structure",
+                        '1-Percent-Annual-Chance Flood Discharge Contained in Structure': "1-Percent-Annual-Chance Flood Discharge Contained in Structure",
+                        '9000': "Other / Misc. Structure"
+                        }
+                        x = D_Struct_Typ[STRUCT_TYP]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'AREA_UNIT':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "AREA_UNIT",
+                        expression="MatchDescrip(!AREA_UNIT!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(AREA_UNIT):
+                        D_Area_Units = {
+                        ' ': " ",
+                        '1000': "Acres",
+                        '1010': "Hectares",
+                        '1020': "Square Feet",
+                        'Square Feet': "Square Feet",
+                        '1030': "Square Meters",
+                        'Square Meters': "Square Meters",
+                        '1040': "Square Yards",
+                        '1050': "Square Miles",
+                        'Square Miles': "Square Miles",
+                        '1060': "Square Kilometers",
+                        'NP': "NP"
+                        }
+                        x = D_Area_Units[AREA_UNIT]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'STUDY_PRE':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "STUDY_PRE",
+                        expression="MatchDescrip(!STUDY_PRE!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(STUDY_PRE):
+                        D_Study_Prefix = {
+                        ' ': " ",
+                        '0100': "Borough of",
+                        '0200': "City and County of",
+                        '0300': "City of",
+                        '0400': "Municipality of",
+                        '0500': "Town of",
+                        '0600': "Township of",
+                        '0700': "Village of",
+                        '0800': "Town and Village of",
+                        '0900': "Tribal Nation",
+                        '9000': "Other",
+                        'Other': "Other"
+                        }
+                        x = D_Study_Prefix[STUDY_PRE]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'JURIS_TYP':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "JURIS_TYP",
+                        expression="MatchDescrip(!JURIS_TYP!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(JURIS_TYP):
+                        D_Juris_Typ = {
+                        ' ': " ",
+                        '0100': "All Jurisdictions",
+                        '0200': "And Incorporated Areas",
+                        'And Incorporated Areas': "And Incorporated Areas",
+                        '0300': "Independent City",
+                        '0400': "Tribal Nation",
+                        '0900': "Unincorporated Areas",
+                        'Unincorporated Areas': "Unincorporated Areas"
+                        }
+                        x = D_Juris_Typ[JURIS_TYP]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'H_DATUM':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "H_DATUM",
+                        expression="MatchDescrip(!H_DATUM!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(H_DATUM):
+                        D_Horiz_Datum = {
+                        ' ': " ",
+                        'NAD27': "North American Datum 1927",
+                        'NAD83': "North American Datum 1983",
+                        'North American Datum 1983': "North American Datum 1983",
+                        '83HARN': "North American Datum 1983 HARN",
+                        'NSRS07': "NAD83 (NSRS2007)",
+                        'NP': "NP"
+                        }
+                        x = D_Horiz_Datum[H_DATUM]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                # incomplete
+                if field.name == 'PROJECTION':
+                    try:
+                        count += 1
+                        arcpy.management.CalculateField(
+                            dbf,
+                            "PROJECTION",
+                            expression="MatchDescrip(!PROJECTION!)",
+                            expression_type="PYTHON3",
+                            code_block="""def MatchDescrip(PROJECTION):
+                            D_Proj = {
+                            ' ': " ",
+                            'GCS': "GEOGRAPHIC COORDINATE SYSTEM",
+                            '9000': "OTHER",
+                            '0301': "STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS NORTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS NORTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS NORTH ZONE",
+                            '0302': "STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS SOUTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS SOUTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS SOUTH ZONE",
+                            '3501': "STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA NORTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA NORTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA NORTH ZONE",
+                            '3502': "STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA SOUTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA SOUTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA SOUTH ZONE",
+                            '4203': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS CENTRAL ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS CENTRAL ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS CENTRAL ZONE",
+                            '4202': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH CENTRAL ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH CENTRAL ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH CENTRAL ZONE",
+                            '4201': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH ZONE",
+                            '4204': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH CENTRAL ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH CENTRAL ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH CENTRAL ZONE",
+                            '4205': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH ZONE",
+                            'UTM': "UNIVERSAL TRANSVERSE MERCATOR",
+                            'UNIVERSAL TRANSVERSE MERCATOR': "UNIVERSAL TRANSVERSE MERCATOR",
+                            'NP': "NP"
+                            }
+                            x = D_Proj[PROJECTION]
+                            return x
+                        """,
+                            field_type="TEXT",
+                            enforce_domains="NO_ENFORCE_DOMAINS"
+                        )
+                    except KeyError:
+                        fname = field.name
+                        error_message = arcpy.AddError(arcpy.GetMessages(2))
+                        arcpy.AddMessage(f"{error_message}")
+                        arcpy.AddMessage(f"The above attribute value could not be matched to a domain code for field {fname} in {dbf}.")
+                # incomplete
+                if field.name == 'PROJ_SECND':
+                    try:
+                        count += 1
+                        arcpy.management.CalculateField(
+                            dbf,
+                            "PROJ_SECND",
+                            expression="MatchDescrip(!PROJ_SECND!)",
+                            expression_type="PYTHON3",
+                            code_block="""def MatchDescrip(PROJ_SECND):
+                            D_Proj = {
+                            ' ': " ",
+                            'GCS': "GEOGRAPHIC COORDINATE SYSTEM",
+                            '9000': "OTHER",
+                            '0301': "STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS NORTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS NORTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS NORTH ZONE",
+                            '0302': "STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS SOUTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS SOUTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, ARKANSAS SOUTH ZONE",
+                            '3501': "STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA NORTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA NORTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA NORTH ZONE",
+                            '3502': "STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA SOUTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA SOUTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, OKLAHOMA SOUTH ZONE",
+                            '4203': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS CENTRAL ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS CENTRAL ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS CENTRAL ZONE",
+                            '4202': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH CENTRAL ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH CENTRAL ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH CENTRAL ZONE",
+                            '4201': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS NORTH ZONE",
+                            '4204': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH CENTRAL ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH CENTRAL ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH CENTRAL ZONE",
+                            '4205': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH ZONE",
+                            'STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH ZONE': "STATE PLANE LAMBERT CONFORMAL CONIC, TEXAS SOUTH ZONE",
+                            'UTM': "UNIVERSAL TRANSVERSE MERCATOR",
+                            'UNIVERSAL TRANSVERSE MERCATOR': "UNIVERSAL TRANSVERSE MERCATOR",
+                            'NP': "NP"
+                            }
+                            x = D_Proj[PROJ_SECND]
+                            return x
+                        """,
+                            field_type="TEXT",
+                            enforce_domains="NO_ENFORCE_DOMAINS"
+                        )
+                    except KeyError:
+                        fname = field.name
+                        error_message = arcpy.AddError(arcpy.GetMessages(2))
+                        arcpy.AddMessage(f"{error_message}")
+                        arcpy.AddMessage(f"The above attribute value could not be matched to a domain code for field {fname} in {dbf}.")
+                if field.name == 'PROJ_UNIT':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "PROJ_UNIT",
+                        expression="MatchDescrip(!PROJ_UNIT!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(PROJ_UNIT):
+                        D_Proj_Unit = {
+                        ' ': " ",
+                        'FT': "Feet",
+                        'Feet': "Feet",
+                        'USFT': "US Survey Feet",
+                        'US Survey Feet': "US Survey Feet",
+                        'INTLFT': "International Feet",
+                        'METER': "Meters",
+                        'Meters': "Meters",
+                        'DECDEG': "Decimal Degrees",
+                        'Decimal Degrees': "Decimal Degrees",
+                        'NP': "NP"
+                        }
+                        x = D_Proj_Unit[PROJ_UNIT]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'PROJ_SUNIT':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "PROJ_SUNIT",
+                        expression="MatchDescrip(!PROJ_SUNIT!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(PROJ_SUNIT):
+                        D_Proj_Unit = {
+                        ' ': " ",
+                        'FT': "Feet",
+                        'Feet': "Feet",
+                        'USFT': "US Survey Feet",
+                        'US Survey Feet': "US Survey Feet",
+                        'INTLFT': "International Feet",
+                        'METER': "Meters",
+                        'Meters': "Meters",
+                        'DECDEG': "Decimal Degrees",
+                        'Decimal Degrees': "Decimal Degrees",
+                        'NP': "NP"
+                        }
+                        x = D_Proj_Unit[PROJ_SUNIT]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'EVENT_TYP':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "EVENT_TYP",
+                        expression="MatchDescrip(!EVENT_TYP!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(EVENT_TYP):
+                        D_Event = {
+                        '50pct': "50 Percent Chance",
+                        '04pct': "4 Percent Chance",
+                        '4 Percent Chance': "4 Percent Chance",
+                        '02pct': "2 Percent Chance",
+                        '2 Percent Chance': "2 Percent Chance",
+                        '01plus': "1 Percent Plus Chance",
+                        '01minus': "1 Percent Minus Chance",
+                        '01pct': "1 Percent Chance",
+                        '1 Percent Chance': "1 Percent Chance",
+                        '0_2pct': "0.2 Percent Chance",
+                        '0.2 Percent Chance': "0.2 Percent Chance",
+                        '01pctfut': "1 Percent Chance Future Conditions",
+                        '10pct': "10 Percent Chance",
+                        '10 Percent Chance': "10 Percent Chance",
+                        '20pct': "20 Percent Chance"
+                        }
+                        x = D_Event[EVENT_TYP]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'STRUC_FACE':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "STRUC_FACE",
+                        expression="MatchDescrip(!STRUC_FACE!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(STRUC_FACE):
+                        D_Struct_Face = {
+                        'UP': "Upstream",
+                        'Upstream': "Upstream",
+                        'DN': "Downstream",
+                        'Downstream': "Downstream",
+                        'UNK': "Unknown",
+                        'Unknown': "Unknown"
+                        }
+                        x = D_Struct_Face[STRUC_FACE]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'ORIENT':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "ORIENT",
+                        expression="MatchDescrip(!ORIENT!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(ORIENT):
+                        D_Orient = {
+                        'H': "Horizontal",
+                        'Horizontal': "Horizontal",
+                        'V': "Vertical",
+                        'Vertical': "Vertical"
+                        }
+                        x = D_Orient[ORIENT]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'ADJUSTED':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "ADJUSTED",
+                        expression="MatchDescrip(!ADJUSTED!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(ADJUSTED):
+                        D_Adjust = {
+                        'L': "Left",
+                        'Left': "Left",
+                        'R': "Right",
+                        'Right': "Right",
+                        'C': "Center",
+                        'Center': "Center",
+                        'T': "Top",
+                        'Top': "Top",
+                        'M': "Middle",
+                        'Middle': "Middle",
+                        'B': "Bottom",
+                        'Bottom': "Bottom"
+                        }
+                        x = D_Adjust[ADJUSTED]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'STATE':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "STATE",
+                        expression="MatchDescrip(!STATE!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(STATE):
+                        D_State = {
+                        ' ': " ",
+                        'AL': "Alabama",
+                        'AK': "Alaska",
+                        'AS': "American Samoa",
+                        'AR': "Arkansas",
+                        'Arkansas': "Arkansas",
+                        'AZ': "Arizona",
+                        'CA': "California",
+                        'CO': "Colorado",
+                        'CT': "Connecticut",
+                        'DE': "Delaware",
+                        'DC': "District of Columbia",
+                        'FL': "Florida",
+                        'GA': "Georgia",
+                        'GU': "Guam",
+                        'HI': "Hawaii",
+                        'ID': "Idaho",
+                        'IL': "Illinois",
+                        'IN': "Indiana",
+                        'IA': "Iowa",
+                        'KS': "Kansas",
+                        'KY': "Kentucky",
+                        'LA': "Louisiana",
+                        'Louisiana': "Louisiana",
+                        'ME': "Maine",
+                        'MH': "Marshall Islands",
+                        'MD': "Maryland",
+                        'MA': "Massachusetts",
+                        'MI': "Michigan",
+                        'FM': "Micronesia",
+                        'MN': "Minnesota",
+                        'MS': "Mississippi",
+                        'MO': "Missouri",
+                        'MT': "Montana",
+                        'NE': "Nebraska",
+                        'NV': "Nevada",
+                        'NH': "New Hampshire",
+                        'NJ': "New Jersey",
+                        'NM': "New Mexico",
+                        'New Mexico': "New Mexico",
+                        'NY': "New York",
+                        'NC': "North Carolina",
+                        'ND': "North Dakota",
+                        'MP': "Northern Mariana Islands",
+                        'OH': "Ohio",
+                        'OK': "Oklahoma",
+                        'Oklahoma': "Oklahoma",
+                        'OR': "Oregon",
+                        'PW': "Palau",
+                        'PA': "Pennsylvania",
+                        'PR': "Puerto Rico",
+                        'RI': "Rhode Island",
+                        'SC': "South Carolina",
+                        'SD': "South Dakota",
+                        'South Dakota': "South Dakota",
+                        'TN': "Tennessee",
+                        'TX': "Texas",
+                        'Texas': "Texas",
+                        'UM': "U.S. Minor Islands",
+                        'UT': "Utah",
+                        'VT': "Vermont",
+                        'VA': "Virginia",
+                        'VI': "Virgin Islands",
+                        'WA': "Washington",
+                        'WV': "West Virginia",
+                        'WY': "Wyoming",
+                        'NP': "NP",
+                        'WI': "Wisconsin"
+                        }
+                        x = D_State[STATE]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'REPOS_ST':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "REPOS_ST",
+                        expression="MatchDescrip(!REPOS_ST!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(REPOS_ST):
+                        D_State = {
+                        ' ': " ",
+                        'AL': "Alabama",
+                        'AK': "Alaska",
+                        'AS': "American Samoa",
+                        'AR': "Arkansas",
+                        'Arkansas': "Arkansas",
+                        'AZ': "Arizona",
+                        'CA': "California",
+                        'CO': "Colorado",
+                        'CT': "Connecticut",
+                        'DE': "Delaware",
+                        'DC': "District of Columbia",
+                        'FL': "Florida",
+                        'GA': "Georgia",
+                        'GU': "Guam",
+                        'HI': "Hawaii",
+                        'ID': "Idaho",
+                        'IL': "Illinois",
+                        'IN': "Indiana",
+                        'IA': "Iowa",
+                        'KS': "Kansas",
+                        'KY': "Kentucky",
+                        'LA': "Louisiana",
+                        'Louisiana': "Louisiana",
+                        'ME': "Maine",
+                        'MH': "Marshall Islands",
+                        'MD': "Maryland",
+                        'MA': "Massachusetts",
+                        'MI': "Michigan",
+                        'FM': "Micronesia",
+                        'MN': "Minnesota",
+                        'MS': "Mississippi",
+                        'MO': "Missouri",
+                        'MT': "Montana",
+                        'NE': "Nebraska",
+                        'NV': "Nevada",
+                        'NH': "New Hampshire",
+                        'NJ': "New Jersey",
+                        'NM': "New Mexico",
+                        'New Mexico': "New Mexico",
+                        'NY': "New York",
+                        'NC': "North Carolina",
+                        'ND': "North Dakota",
+                        'MP': "Northern Mariana Islands",
+                        'OH': "Ohio",
+                        'OK': "Oklahoma",
+                        'Oklahoma': "Oklahoma",
+                        'OR': "Oregon",
+                        'PW': "Palau",
+                        'PA': "Pennsylvania",
+                        'PR': "Puerto Rico",
+                        'RI': "Rhode Island",
+                        'SC': "South Carolina",
+                        'SD': "South Dakota",
+                        'South Dakota': "South Dakota",
+                        'TN': "Tennessee",
+                        'TX': "Texas",
+                        'Texas': "Texas",
+                        'UM': "U.S. Minor Islands",
+                        'UT': "Utah",
+                        'VT': "Vermont",
+                        'VA': "Virginia",
+                        'VI': "Virgin Islands",
+                        'WA': "Washington",
+                        'WV': "West Virginia",
+                        'WY': "Wyoming",
+                        'NP': "NP",
+                        'WI': "Wisconsin"
+                        }
+                        x = D_State[REPOS_ST]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'STATE_NM':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "STATE_NM",
+                        expression="MatchDescrip(!STATE_NM!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(STATE_NM):
+                        D_State = {
+                        ' ': " ",
+                        'AL': "Alabama",
+                        'AK': "Alaska",
+                        'AS': "American Samoa",
+                        'AR': "Arkansas",
+                        'Arkansas': "Arkansas",
+                        'AZ': "Arizona",
+                        'CA': "California",
+                        'CO': "Colorado",
+                        'CT': "Connecticut",
+                        'DE': "Delaware",
+                        'DC': "District of Columbia",
+                        'FL': "Florida",
+                        'GA': "Georgia",
+                        'GU': "Guam",
+                        'HI': "Hawaii",
+                        'ID': "Idaho",
+                        'IL': "Illinois",
+                        'IN': "Indiana",
+                        'IA': "Iowa",
+                        'KS': "Kansas",
+                        'KY': "Kentucky",
+                        'LA': "Louisiana",
+                        'Louisiana': "Louisiana",
+                        'ME': "Maine",
+                        'MH': "Marshall Islands",
+                        'MD': "Maryland",
+                        'MA': "Massachusetts",
+                        'MI': "Michigan",
+                        'FM': "Micronesia",
+                        'MN': "Minnesota",
+                        'MS': "Mississippi",
+                        'MO': "Missouri",
+                        'MT': "Montana",
+                        'NE': "Nebraska",
+                        'NV': "Nevada",
+                        'NH': "New Hampshire",
+                        'NJ': "New Jersey",
+                        'NM': "New Mexico",
+                        'New Mexico': "New Mexico",
+                        'NY': "New York",
+                        'NC': "North Carolina",
+                        'ND': "North Dakota",
+                        'MP': "Northern Mariana Islands",
+                        'OH': "Ohio",
+                        'OK': "Oklahoma",
+                        'Oklahoma': "Oklahoma",
+                        'OR': "Oregon",
+                        'PW': "Palau",
+                        'PA': "Pennsylvania",
+                        'PR': "Puerto Rico",
+                        'RI': "Rhode Island",
+                        'SC': "South Carolina",
+                        'SD': "South Dakota",
+                        'South Dakota': "South Dakota",
+                        'TN': "Tennessee",
+                        'TX': "Texas",
+                        'Texas': "Texas",
+                        'UM': "U.S. Minor Islands",
+                        'UT': "Utah",
+                        'VT': "Vermont",
+                        'VA': "Virginia",
+                        'VI': "Virgin Islands",
+                        'WA': "Washington",
+                        'WV': "West Virginia",
+                        'WY': "Wyoming",
+                        'NP': "NP",
+                        'WI': "Wisconsin"
+                        }
+                        x = D_State[STATE_NM]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'MTG_TYP':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "MTG_TYP",
+                        expression="MatchDescrip(!MTG_TYP!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(MTG_TYP):
+                        D_Mtg_Typ = {
+                        '1000': "CCO",
+                        'CCO': "CCO",
+                        '1010': "Flood Risk Review",
+                        '1040': "Project Discovery",
+                        'Project Discovery': "Project Discovery",
+                        '1050': "Resilience",
+                        '1060': "Scoping",
+                        'Scoping': "Scoping",
+                        '9000': "Other",
+                        'Other': "Other",
+                        'NP': "NP"
+                        }
+                        x = D_Mtg_Typ[MTG_TYP]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'LOC_ACC':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        dbf,
+                        "LOC_ACC",
+                        expression="MatchDescrip(!LOC_ACC!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(LOC_ACC):
+                        D_Mtg_Typ = {
+                        'H': "High",
+                        'High': "High",
+                        'M': "Medium",
+                        'Medium': "Medium",
+                        'L': "Low",
+                        'Low': "Low"
+                        }
+                        x = D_Mtg_Typ[LOC_ACC]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+            arcpy.AddMessage(f"Converted {count} fields in {dbf}.")
 
 
 class EndStationSelect(object):
@@ -651,7 +1682,7 @@ class EndStationSelect(object):
             direction='Input',
             parameterType='Required'
         )
-        fc.filter.list = ["Line"]
+        fc.filter.list = ["Polyline"]
         params = [fc]
         return params
 
@@ -725,7 +1756,7 @@ class StartStations(object):
             direction='Input',
             parameterType='Required'
         )
-        fc.filter.list = ["Line"]
+        fc.filter.list = ["Polyline"]
         params = [fd, fc]
         return params
 
@@ -827,7 +1858,7 @@ class Indx_Wtr_Features(object):
             parameterType='Required',
             multiValue = False
         )
-        wl.filter.list = ["Line"]
+        wl.filter.list = ["Polyline"]
         wa = arcpy.Parameter(
             name='Water Polygons',
             displayName='Water Polygons',
@@ -1018,5 +2049,91 @@ class Indx_Wtr_Features(object):
             enforce_domains="NO_ENFORCE_DOMAINS"
         )
         arcpy.AddMessage(f"Turned on {wa_count} water area features.")
+        
 
-                
+class Append_XS_Elev(object):
+    def __init__(self):
+        self.label = "Match & Load L_XS_Elev"
+        self.description = "Select matching L_XS_Elev rows and append to working L_XS_Elev table."
+        
+    def getParameterInfo(self):
+    # Define parameters
+        fgdb = arcpy.Parameter(
+            name='Input Workspace',
+            displayName='Input Workspace',
+            datatype='DEWorkspace',
+            direction='Input',
+            parameterType='Required'
+        )
+        xs = arcpy.Parameter(
+            name='Input XS',
+            displayName='Input XS',
+            datatype='GPFeatureLayer',
+            direction='Input',
+            parameterType='Required'
+        )
+        xs.filter.list = ["Polyline"]
+        xs_field = arcpy.Parameter(
+            name='XS Join Field',
+            displayName='XS Join Field',
+            datatype='Field',
+            direction='Input',
+            parameterType='Required'
+        )
+        xs_elev_j = arcpy.Parameter(
+            name='Join L_XS_Elev Table',
+            displayName='Join L_XS_Elev Table',
+            datatype='GPTableView',
+            direction='Input',
+            parameterType='Required'
+        )
+        xs_elev_i = arcpy.Parameter(
+            name='Input L_XS_Elev Table',
+            displayName='Input L_XS_Elev Table',
+            datatype='GPTableView',
+            direction='Input',
+            parameterType='Required'
+        )
+        params = [xs, xs_field, xs_elev_j, xs_elev_i]
+        return params
+
+    def isLicensed(self):
+        return True
+
+    def updateParameters(self, parameters):
+        return
+
+    def updateMessages(self, parameters):
+        return
+
+    def execute(self, parameters, messages):
+        xs = parameters[0].valueAsText
+        xs_field = parameters[1].valueAsText
+        xs_elev_j = parameters[2].valueAsText
+        xs_elev_i = parameters[3].valueAsText
+        # Create list of XS_LN_IDs
+        xs_id_list = []
+        cursor_input = arcpy.da.SearchCursor(
+            rf"{xs}", 
+            ['OBJECTID', f'{xs_field}']
+            )
+        for row in cursor_input:
+            xs_id_list.append(row[1])
+        # Turn list into tuple for valid expression
+        xs_id_list = tuple(xs_id_list)
+        # Select matching rows in Join L_XS_Elev Table
+        matching = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=xs_elev_j,
+            selection_type="NEW_SELECTION",
+            where_clause=f"XS_LN_ID IN {xs_id_list}",
+            invert_where_clause=None
+        )
+        count = arcpy.management.GetCount(matching)
+        # Append selected rows
+        arcpy.management.Append(
+            f"{matching}", 
+            f"{xs_elev_i}", 
+            "NO_TEST"
+            )
+        arcpy.AddMessage(f"Appended {count} rows from Join L_XS_Elev table.")
+        
