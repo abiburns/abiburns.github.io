@@ -3,20 +3,71 @@
 import arcpy
 import arcgis
 import pandas as pd
-# This module is supposed to clear the cache for faster processing
-import importlib
 
 
 class Toolbox(object):
     def __init__(self):
         self.label = "DFIRM & FRD Toolbox"
         self.alias = "DFIRMFRDToolbox"
-        self.description = "This Python toolbox contains geoprocessing tools associated with building" \
-        " a Draft FIRM or FRD file geodatabase."
+        self.description = "This Python toolbox contains geoprocessing tools associated with building a Draft FIRM or FRD file geodatabase."
 
         # List of tool classes associated with this toolbox
-        self.tools = [Remove_Add_SpatialIndex, MatchCodes_FC, MatchCodes_TBL, EndStationSelect, StartStations, Indx_Wtr_Features, Append_XS_Elev]
+        self.tools = [Letter_XS, Remove_Add_SpatialIndex, MatchCodes_FC, MatchCodes_TBL, EndStationSelect, StartStations, Indx_Wtr_Features, Append_XS_Elev]
 
+
+class Letter_XS(object):
+    def __init__(self):
+        self.label = "Alpha-Letter XS"
+        self.description = "Iterate through selected XS features and letter alphabetically."
+    def getParameterInfo(self):
+    # Define parameters
+        xs = arcpy.Parameter(
+            name='Selected XS',
+            displayName='Selected XS',
+            datatype='GPFeatureLayer',
+            direction='Input',
+            parameterType='Required',
+            multiValue = True
+        )
+        params = [xs]
+        return params
+
+    def isLicensed(self):
+        return True
+
+    def updateParameters(self, parameters):
+        return
+
+    def updateMessages(self, parameters):
+        return
+
+    def execute(self, parameters, messages):
+        # only lettered to 52
+        # alpha = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T',\
+        #             'U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL',\
+        #                 'AM','AN','AO','AP','AQ','AR','AS','AT','AU','AV','AW','AX','AY','AZ']
+        xs = parameters[0].valueAsText
+        cursor = arcpy.da.SearchCursor(
+            xs, 
+            ['STREAM_STN','WSEL_REG'],
+            sql_clause=(None, f"ORDER BY 'WSEL_REG' ASC"))
+        count = 0
+        for row in cursor:
+            arcpy.management.CalculateField(
+                row, 
+                "XS_LTR", 
+                "sequence_letters()", 
+                "PYTHON3", 
+"""import string
+letters = list(string.ascii_uppercase)
+rec = 0
+def sequence_letters():
+    global rec
+    res = letters[rec % 26]
+    rec += 1
+    return res""", 
+                "TEXT", 
+                "NO_ENFORCE_DOMAINS")
 
 class Remove_Add_SpatialIndex(object):
     def __init__(self):
@@ -118,15 +169,42 @@ class MatchCodes_FC(object):
                         D_Study_Typ = {
                         'NP': "NP",
                         '1000': "SFHA without BFE",
+                        'SFHA without BFE': "SFHA without BFE",
                         '1010': "SFHA with BFE published only in FIS",
+                        'SFHA with BFE published only in FIS': "SFHA with BFE published only in FIS",
                         '1030': "BLE available but unpublished",
-                        'SFHA with unpublished BFE': "SFHA with unpublished BFE",
+                        'BLE available but unpublished': "BLE available but unpublished",
                         '1040': "SFHA with unpublished BFE",
+                        'SFHA with unpublished BFE': "SFHA with unpublished BFE",
                         '1050': "SFHA with BFE no floodway",
+                        'SFHA with BFE no floodway': "SFHA with BFE no floodway",
                         '1060': "SFHA with BFE and floodway",
+                        'SFHA with BFE and floodway': "SFHA with BFE and floodway",
                         '1070': "Shaded Zone X with depths less than 1"
                         }
                         x = D_Study_Typ[STUDY_TYP]
+                        return x
+                    """,
+                        field_type="TEXT",
+                        enforce_domains="NO_ENFORCE_DOMAINS"
+                    )
+                if field.name == 'BFE_LN_TYP':
+                    count += 1
+                    arcpy.management.CalculateField(
+                        shp,
+                        "BFE_LN_TYP",
+                        expression="MatchDescrip(!BFE_LN_TYP!)",
+                        expression_type="PYTHON3",
+                        code_block="""def MatchDescrip(BFE_LN_TYP):
+                        D_XS_Ln_Typ = {
+                        '1010': "LETTERED, MAPPED",
+                        'LETTERED, MAPPED': "LETTERED, MAPPED",
+                        '1020': "NOT LETTERED, MAPPED",
+                        'NOT LETTERED, MAPPED': "NOT LETTERED, MAPPED",
+                        '1030': "NOT LETTERED, NOT MAPPED",
+                        'NOT LETTERED, NOT MAPPED': "NOT LETTERED, NOT MAPPED"
+                        }
+                        x = D_XS_Ln_Typ[BFE_LN_TYP]
                         return x
                     """,
                         field_type="TEXT",
@@ -225,10 +303,10 @@ class MatchCodes_FC(object):
                         D_Ln_Typ = {
                         '2034': "SFHA / Flood Zone Boundary",
                         'SFHA / Flood Zone Boundary': "SFHA / Flood Zone Boundary",
-                        'Limit Lines': "Limit Lines",
                         '1010': "Limit Lines",
-                        'Other Boundary': "Other Boundary",
+                        'Limit Lines': "Limit Lines",
                         '1020': "Other Boundary",
+                        'Other Boundary': "Other Boundary",
                         '2050': "Flowage Easement Boundary"
                         }
                         x = D_Ln_Typ[LN_TYP]
@@ -690,21 +768,22 @@ class MatchCodes_FC(object):
                         '1030': "COMMUNITY ENCROACHMENT AREA",
                         '1050': "DENSITY FRINGE AREA",
                         '1100': "FLOODWAY",
+                        'FLOODWAY': "FLOODWAY",
                         '1110': "FLOODWAY CONTAINED IN STRUCTURE",
                         '1200': "FLOWAGE EASEMENT AREA",
                         '1230': "NARROW FLOODWAY",
                         '1220': "RIVERINE FLOODWAY SHOWN IN COASTAL ZONE",
                         '1210': "STATE ENCROACHMENT AREA",
-                        'AREA OF MINIMAL FLOOD HAZARD': "AREA OF MINIMAL FLOOD HAZARD",
                         '2000': "AREA OF MINIMAL FLOOD HAZARD",
+                        'AREA OF MINIMAL FLOOD HAZARD': "AREA OF MINIMAL FLOOD HAZARD",
                         '1120': "FLOODWAY CONTAINED IN CHANNEL",
                         '0100': "COASTAL FLOODPLAIN",
                         '0120': "COMBINED RIVERINE AND COASTAL FLOODPLAIN",
                         '1240': "RIVERINE FLOODWAY IN COMBINED RIVERINE AND COASTAL ZONE",
                         '3000': "AREA WITH FLOOD HAZARD DUE TO NON-ACCREDITED LEVEE SYSTEM",
                         '3010': "AREA WITH REDUCED FLOOD HAZARD DUE TO PROVISIONALLY ACCREDITED LEVEE SYSTEM",
-                        '0.2 PCT ANNUAL CHANCE FLOOD HAZARD': "0.2 PCT ANNUAL CHANCE FLOOD HAZARD",
                         '0500': "0.2 PCT ANNUAL CHANCE FLOOD HAZARD",
+                        '0.2 PCT ANNUAL CHANCE FLOOD HAZARD': "0.2 PCT ANNUAL CHANCE FLOOD HAZARD",
                         '0510': "0.2 PCT ANNUAL CHANCE FLOOD HAZARD CONTAINED IN STRUCTURE",
                         '0210': "1 PCT ANNUAL CHANCE FLOOD HAZARD CONTAINED IN CHANNEL",
                         '0200': "1 PCT ANNUAL CHANCE FLOOD HAZARD CONTAINED IN STRUCTURE",
@@ -1277,7 +1356,9 @@ class MatchCodes_TBL(object):
                         '02pct': "2 Percent Chance",
                         '2 Percent Chance': "2 Percent Chance",
                         '01plus': "1 Percent Plus Chance",
+                        '1 Percent Plus Chance': "1 Percent Plus Chance",
                         '01minus': "1 Percent Minus Chance",
+                        '1 Percent Minus Chance': "1 Percent Minus Chance",
                         '01pct': "1 Percent Chance",
                         '1 Percent Chance': "1 Percent Chance",
                         '0_2pct': "0.2 Percent Chance",
@@ -1738,8 +1819,7 @@ class EndStationSelect(object):
 class StartStations(object):
     def __init__(self):
         self.label = "Generate Start Stations"
-        self.description = "Generate points at the start (begin) vertices of each tributary stream and /"
-        "attribute with stream name. *For some reason needs 'end' point location parameter although appears at starts*"
+        self.description = "Generate points at the start (downstream) vertices of each tributary stream and attribute with stream name."
     def getParameterInfo(self):
     # Define parameters
         fd = arcpy.Parameter(
@@ -1785,7 +1865,7 @@ class StartStations(object):
             arcpy.management.FeatureVerticesToPoints(
                 in_features="WTR_LN_Dissolve", 
                 out_feature_class="Start_pts", 
-                point_location="END")
+                point_location="START") # start point location
         ptcount = arcpy.management.GetCount("Start_pts")
     # Delete duplicate points
         arcpy.management.DeleteIdentical(
@@ -1798,13 +1878,12 @@ class StartStations(object):
             in_table="Start_pts",
             out_table="Start_pts_Statistics",
             statistics_fields="WTR_NM COUNT",
-            case_field="WTR_NM",
-            concatenation_separator="") 
+            case_field="WTR_NM") 
     # Calculate attributes
         arcpy.management.CalculateField(
             in_table="Start_pts",
             field="START_DESC",
-            expression="'Stream distance in feet above confluence with ' + $feature.WTR_NM",
+            expression="'Stream distance in feet above confluence with '",
             expression_type="ARCADE",
             code_block="",
             field_type="TEXT",
