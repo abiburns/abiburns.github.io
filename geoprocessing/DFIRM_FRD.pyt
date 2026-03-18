@@ -12,62 +12,8 @@ class Toolbox(object):
         self.description = "This Python toolbox contains geoprocessing tools associated with building a Draft FIRM or FRD file geodatabase."
 
         # List of tool classes associated with this toolbox
-        self.tools = [Letter_XS, Remove_Add_SpatialIndex, MatchCodes_FC, MatchCodes_TBL, EndStationSelect, StartStations, Indx_Wtr_Features, Append_XS_Elev]
+        self.tools = [Remove_Add_SpatialIndex, MatchCodes_FC, MatchCodes_TBL, EndStationSelect, StartStations, Indx_Wtr_Features, Append_XS_Elev]
 
-
-class Letter_XS(object):
-    def __init__(self):
-        self.label = "Alpha-Letter XS"
-        self.description = "Iterate through selected XS features and letter alphabetically."
-    def getParameterInfo(self):
-    # Define parameters
-        xs = arcpy.Parameter(
-            name='Selected XS',
-            displayName='Selected XS',
-            datatype='GPFeatureLayer',
-            direction='Input',
-            parameterType='Required',
-            multiValue = True
-        )
-        params = [xs]
-        return params
-
-    def isLicensed(self):
-        return True
-
-    def updateParameters(self, parameters):
-        return
-
-    def updateMessages(self, parameters):
-        return
-
-    def execute(self, parameters, messages):
-        # only lettered to 52
-        # alpha = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T',\
-        #             'U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL',\
-        #                 'AM','AN','AO','AP','AQ','AR','AS','AT','AU','AV','AW','AX','AY','AZ']
-        xs = parameters[0].valueAsText
-        cursor = arcpy.da.SearchCursor(
-            xs, 
-            ['STREAM_STN','WSEL_REG'],
-            sql_clause=(None, f"ORDER BY 'WSEL_REG' ASC"))
-        count = 0
-        for row in cursor:
-            arcpy.management.CalculateField(
-                row, 
-                "XS_LTR", 
-                "sequence_letters()", 
-                "PYTHON3", 
-"""import string
-letters = list(string.ascii_uppercase)
-rec = 0
-def sequence_letters():
-    global rec
-    res = letters[rec % 26]
-    rec += 1
-    return res""", 
-                "TEXT", 
-                "NO_ENFORCE_DOMAINS")
 
 class Remove_Add_SpatialIndex(object):
     def __init__(self):
